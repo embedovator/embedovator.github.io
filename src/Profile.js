@@ -39,6 +39,14 @@ export default class Profile extends Component {
           >
             Logout
           </button>
+          <br></br>
+          <br></br>
+          <button
+            className="btn btn-primary btn-lg"
+            id="brightness-up-button"
+          >
+            <span role="img" aria-label="Brightness Up">🔆</span>
+          </button>
         </p>
       </div> : null
     );
