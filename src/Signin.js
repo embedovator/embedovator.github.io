@@ -7,15 +7,15 @@ export default class Signin extends Component {
 
     return (
       <div className="panel-landing" id="section-1">
-        <h1 className="landing-heading">Hello, Blockstack!</h1>
+      <span class="centered">Eyes are tired.</span>
         <p className="lead">
-          <button
+          {/* <button
             className="btn btn-primary btn-lg"
             id="signin-button"
             onClick={ handleSignIn.bind(this) }
           >
             Sign In with Blockstack
-          </button>
+          </button> */}
         </p>
       </div>
     );
