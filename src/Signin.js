@@ -7,7 +7,6 @@ export default class Signin extends Component {
 
     return (
       <div className="panel-landing" id="section-1">
-      <span class="centered">Eyes are tired.</span>
         <p className="lead">
           { <button
             className="btn btn-primary btn-lg"
