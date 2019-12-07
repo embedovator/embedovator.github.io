@@ -19,6 +19,8 @@ export default class Game extends Component {
         super(props);
         this.state = {
             tick: 0,
+            lastActionTick: 0,
+            brightness: 0, 
         }
         this.tick = this.tick.bind(this);
         this.intervalHandle = setInterval(this.tick, 1000);
@@ -32,12 +34,24 @@ export default class Game extends Component {
         // This is probably such a horrible newbie way to tick...but here it is!
         this.setState({
            tick: this.state.tick + 1,
+           lastActionTick: this.state.lastActionTick + 1,
         });
     }
 
+    handleBrightness(brightness) {
+        if((this.state.brightness + brightness) <= 0){
+            this.setState({
+                brightness: 0,
+            });
+        }
+        else {
+            this.setState({
+                brightness: this.state.brightness + brightness,
+            });
+        }
+    }
+
     render() {
-
-
         return (
             <div className="game-area">
                 <div className="actions">
@@ -47,8 +61,13 @@ export default class Game extends Component {
                     />
 
                     <Action
-                        onClick={() => this.props.onSave()}
-                        actionText="Turn up Brightness"
+                        // onClick={() => this.props.onSave()} // eventually handle saving
+                        onClick={() => this.handleBrightness(20)}
+                        actionText="🔆⬆️"
+                    />
+                    <Action
+                        onClick={() => this.handleBrightness(-20)}
+                        actionText="🔆🔽"
                     />
                 </div>
                 <div className="dialog">

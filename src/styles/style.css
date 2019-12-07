@@ -8,7 +8,7 @@
 
 .actions {
   width: 100%;
-  height: 400px;
+  height: 70vh;
   border: 1px solid black;
   display: flex;
   align-items: center;
@@ -18,10 +18,12 @@
 
 .dialog {
   width: 100%;
+  height: 30vh;
   display: flex;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
   vertical-align: middle;
+  
 
   /* margin-left: auto;
   margin-right: auto;
@@ -34,4 +36,5 @@
 button {
   height: 20px;
   width: 100px;
+  border:none;
 }
