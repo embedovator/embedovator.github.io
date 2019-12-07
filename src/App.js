@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Profile from './Profile.js';
 import Signin from './Signin.js';
+import Game from './Game.js';
 import {
   UserSession,
   AppConfig
@@ -10,7 +11,18 @@ const appConfig = new AppConfig()
 const userSession = new UserSession({ appConfig: appConfig })
 
 export default class App extends Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      saveGame: false
+    }
+  }
 
+  handleSave() {
+      this.setState({
+        saveGame: true,
+      });
+  }
 
   handleSignIn(e) {
     e.preventDefault();
@@ -26,9 +38,13 @@ export default class App extends Component {
     return (
       <div className="site-wrapper">
         <div className="site-wrapper-inner">
-          { !userSession.isUserSignedIn() ?
-            <Signin userSession={userSession} handleSignIn={ this.handleSignIn } />
-            : <Profile userSession={userSession} handleSignOut={ this.handleSignOut } />
+          {this.state.saveGame ? 
+            !userSession.isUserSignedIn() ?
+              <Signin userSession={userSession} handleSignIn={ this.handleSignIn } />
+              : <Profile userSession={userSession} handleSignOut={ this.handleSignOut } />
+            : <Game 
+                onSave={() => this.handleSave()} 
+               />
           }
         </div>
       </div>

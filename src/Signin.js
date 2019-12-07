@@ -9,13 +9,13 @@ export default class Signin extends Component {
       <div className="panel-landing" id="section-1">
       <span class="centered">Eyes are tired.</span>
         <p className="lead">
-          {/* <button
+          { <button
             className="btn btn-primary btn-lg"
             id="signin-button"
             onClick={ handleSignIn.bind(this) }
           >
             Sign In with Blockstack
-          </button> */}
+          </button> }
         </p>
       </div>
     );
