@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Helmet } from "react-helmet";
 
 function Action(props) {
     return (
@@ -8,10 +9,38 @@ function Action(props) {
     )
 }
 
-function Dialog(props) {
-    return (
-        <span>{props.dialog}</span>
-    )
+class Dialog extends React.Component {
+    createTable = () => {
+        let table = []
+
+        // Outer loop to create parent
+        for (let i = 0; i < 3; i++) {
+            let children = []
+            // Inner loop to create children
+            // for (let j = 0; j < 5; j++) {
+                children.push(<td>{`${this.props.dialog[i]}`}</td>)
+            // }
+            //Create the parent and add the children
+            table.push(<tr>{children}</tr>)
+        }
+        return table
+    }
+
+
+    render() {
+        return (
+            <table>
+                {this.createTable()}
+            </table>
+        )
+    }
+
+    // return (
+    //     <span>{props.dialog}</span>
+    //     // for (let i = 0; i < lines.length; i++) {
+            
+    //     // }
+    // )
 }
 
 export default class Game extends Component {
@@ -20,7 +49,8 @@ export default class Game extends Component {
         this.state = {
             tick: 0,
             lastActionTick: 0,
-            brightness: 0, 
+            brightness: 30, 
+            dialog: ["Can't see.", "Screen is dim."],
         }
         this.tick = this.tick.bind(this);
         this.intervalHandle = setInterval(this.tick, 1000);
@@ -52,6 +82,9 @@ export default class Game extends Component {
     }
 
     render() {
+        const dialog = this.state.dialog[this.state.tick];
+        // const dialogView = 
+
         return (
             <div className="game-area">
                 <div className="actions">
@@ -71,8 +104,16 @@ export default class Game extends Component {
                     />
                 </div>
                 <div className="dialog">
+                    <Helmet>
+                        <style>{`
+                            :root {
+                                --primary-lightness: ${this.state.brightness}%;
+                                }
+                            `}
+                        </style>
+                    </Helmet>
                      <Dialog 
-                         dialog="Eyes are tired."
+                         dialog={this.state.dialog}
                      />
                 </div>
             </div>

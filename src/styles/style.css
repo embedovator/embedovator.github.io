@@ -16,7 +16,19 @@
   vertical-align: middle;
 }
 
+:root {
+  --primary: hsla(var(--primary-hue), 
+                  var(--primary-saturation), 
+                  var(--primary-lightness), 
+                  var(--primary-alpha));
+  --primary-hue: 0;
+  --primary-saturation: 0%;
+  --primary-lightness: 50%;
+  --primary-alpha: 1;
+}
+
 .dialog {
+  background-color: var(--primary);
   width: 100%;
   height: 30vh;
   display: flex;
