@@ -2,11 +2,18 @@ import React, { Component } from 'react';
 import { Helmet } from "react-helmet";
 
 function Action(props) {
-    return (
-        <button type="button" className="action" onClick={props.onClick}>
-            {props.actionText}
-        </button>
-    )
+    if(props.brightness < 40){
+        return(
+            <br/>
+        )
+    }
+    else{
+        return (
+            <button type="button" className="action" onClick={props.onClick}>
+                {props.actionText}
+            </button>
+        )
+    }
 }
 
 class Dialog extends React.Component {
@@ -14,18 +21,18 @@ class Dialog extends React.Component {
         let table = []
 
         // Outer loop to create parent
-        for (let i = 0; i < 3; i++) {
+        let soliloquy = this.props.soliloquy.peekN(this.props.soliloquy.size());
+        for (let i = this.props.soliloquy.size() - 1; i >= 0; i--) {
             let children = []
             // Inner loop to create children
             // for (let j = 0; j < 5; j++) {
-                children.push(<td>{`${this.props.dialog[i]}`}</td>)
+            children.push(<td>{`${soliloquy[i]}`}</td>)
             // }
             //Create the parent and add the children
             table.push(<tr>{children}</tr>)
         }
         return table
     }
-
 
     render() {
         return (
@@ -34,23 +41,18 @@ class Dialog extends React.Component {
             </table>
         )
     }
-
-    // return (
-    //     <span>{props.dialog}</span>
-    //     // for (let i = 0; i < lines.length; i++) {
-            
-    //     // }
-    // )
 }
 
 export default class Game extends Component {
     constructor(props){
         super(props);
+        var RingBuffer = require('ringbufferjs');
+
         this.state = {
             tick: 0,
             lastActionTick: 0,
             brightness: 30, 
-            dialog: ["Can't see.", "Screen is dim."],
+            soliloquyRB: new RingBuffer(5),
         }
         this.tick = this.tick.bind(this);
         this.intervalHandle = setInterval(this.tick, 1000);
@@ -65,6 +67,7 @@ export default class Game extends Component {
         this.setState({
            tick: this.state.tick + 1,
            lastActionTick: this.state.lastActionTick + 1,
+           brightness: this.state.brightness - 0.2,
         });
     }
 
@@ -82,8 +85,21 @@ export default class Game extends Component {
     }
 
     render() {
-        const dialog = this.state.dialog[this.state.tick];
-        // const dialogView = 
+        let soliloquy= this.state.soliloquyRB;
+        if(this.state.tick === 1){
+            soliloquy.enq("Can't see.");
+        }
+        else if(this.state.tick === 3) {
+            soliloquy.enq("Screen is dim.");
+        }
+        else if(this.state.tick === 7) {
+            soliloquy.enq("Eyes are tired.");
+        }
+        else if(this.state.tick === 10) {
+            soliloquy.enq("...productivity falling.");
+        }
+        else{
+        }
 
         return (
             <div className="game-area">
@@ -91,19 +107,17 @@ export default class Game extends Component {
                     <Action
                         onClick={this.handleAction}
                         actionText="actionText"
+                        brightness={this.state.brightness}
                     />
-
+                </div>
+                <div className="brightness">
                     <Action
                         // onClick={() => this.props.onSave()} // eventually handle saving
                         onClick={() => this.handleBrightness(20)}
-                        actionText="🔆⬆️"
-                    />
-                    <Action
-                        onClick={() => this.handleBrightness(-20)}
-                        actionText="🔆🔽"
+                        actionText="brighten"
                     />
                 </div>
-                <div className="dialog">
+                <div className="soliloquy">
                     <Helmet>
                         <style>{`
                             :root {
@@ -113,7 +127,7 @@ export default class Game extends Component {
                         </style>
                     </Helmet>
                      <Dialog 
-                         dialog={this.state.dialog}
+                         soliloquy={soliloquy}
                      />
                 </div>
             </div>
