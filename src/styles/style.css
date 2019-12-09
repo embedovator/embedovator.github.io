@@ -9,7 +9,9 @@
 .actions {
   width: 100%;
   height: 60vh;
-  border: 1px solid black;
+  border-top: 1px solid black;
+  border-right: 1px solid black;
+  border-left: 1px solid black;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -31,11 +33,11 @@
 .brightness {
   background-color: var(--primary);
   width: 100%;
-  height: 5vh;
+  height: 10vh;
   display: flex;
   border-bottom: 1px solid black;
-  border-right: 1px solid black;
-  border-left: 1px solid black;
+  /* border-right: 1px solid black; */
+  /* border-left: 1px solid black; */
   /* align-items: center; */
   justify-content: center;
   vertical-align: middle;
@@ -44,7 +46,7 @@
 .soliloquy {
   background-color: var(--primary);
   width: 100%;
-  height: 30vh;
+  height: 35vh;
   display: flex;
   /* align-items: center; */
   justify-content: center;
@@ -52,18 +54,20 @@
 }
 
 button {
-	box-shadow:inset 0px 1px 0px 0px #ddccdd;
-	background-color:#dcdcdc;
+  /* box-shadow:inset 0px 1px 0px 0px #ddccdd; */
+  /* width: 100%; */
+  height: 30px;
+  background: transparent;
+	/* background-color:#dcdcdc; */
 	border-radius:6px;
-	border:1px solid #666666;
-	display:inline-block;
+	/* border:1px solid #666666; */
+	/* display:inline-block; */
 	cursor:pointer;
-	color:#666666;
+	/* color:#666666; */
 	/* font-family:Arial; */
 	/* font-size:10px; */
 	/* font-weight:bold; */
-	padding:0px 10px;
-	text-decoration:none;
+	padding:1px 10px;
 }
 button:hover {
 	background-color:#f6f6f6;
