@@ -9,48 +9,6 @@ function Action(props) {
     )
 }
 
-class Screen extends React.Component {
-    constructor(props){
-        super(props);
-        this.state = {
-            screen: {
-              home:
-                [<Action
-                    onClick={this.props.onQuiet}
-                    actionText="A quiet room"
-                />, 
-                <div className ="brightness">
-                    <Action
-                        onClick={this.props.onBrighten}
-                        actionText="brighten"
-                    />
-                </div>
-                ],
-              quiet:
-                [<Action
-                    onClick={this.props.onBack}
-                    actionText="Back"
-                />,
-                <Action
-                    onClick={this.props.onCode}
-                    actionText="Code"
-                />],
-            },
-            currentScreen: 0,
-            prevScreen: 0,
-        }
-    };
-
-    render() {
-        let screen = this.state.screen[this.props.screenKey];
-        return (
-            <div>
-                {screen}
-            </div>
-        )
-    };
-}
-
 class Actionz extends React.Component {
     createTable = () => {
         let table = []
@@ -75,11 +33,9 @@ class Actionz extends React.Component {
     render() {
         return (
             <div>
-                <span>Hey look, a table!</span>
                 <table>
                     {this.createTable()}
                 </table>
-                <span>Table done.</span>
             </div>
         )
     }
@@ -93,11 +49,7 @@ class Dialog extends React.Component {
         let soliloquy = this.props.soliloquy.peekN(this.props.soliloquy.size());
         for (let i = this.props.soliloquy.size() - 1; i >= 0; i--) {
             let children = []
-            // Inner loop to create children
-            // for (let j = 0; j < 5; j++) {
             children.push(<td>{`${soliloquy[i]}`}</td>)
-            // }
-            //Create the parent and add the children
             table.push(<tr>{children}</tr>)
         }
         return table
@@ -127,27 +79,28 @@ export default class Game extends Component {
             prevScreenKey: "home",
             codeXP: 0,
             fsm: new StateMachine({
-                init: 'solid',
+                init: 'home',
                 transitions: [
-                    { name: 'melt', from: 'solid', to: 'liquid' },
-                    { name: 'freeze', from: 'liquid', to: 'solid' },
-                    { name: 'vaporize', from: 'liquid', to: 'gas' },
-                    { name: 'condense', from: 'gas', to: 'liquid' }
+                    /* Transitions */
+                    { name: 'a quiet room', from: 'home', to: 'quiet' },
+                    { name: 'inventory', from: 'home', to: 'inventory' },
+                    /* Going back */
+                    { name: 'back', from: 'quiet', to: 'home' },
+                    { name: 'back', from: 'inventory', to: 'home' },
+                    /* Actions, implemented as state transitions to self */
+                    { name: 'brighten', from: 'home', to: 'home' },
+                    { name: 'code', from: 'quiet', to: 'quiet' },
                 ],
                 methods: {
-                    onMelt: function () { console.log('I melted') },
-                    onFreeze: function () { console.log('I froze') },
-                    onVaporize: function () { console.log('I vaporized') },
-                    onCondense: function () { console.log('I condensed') }
+                    onBrighten: () => this.handleBrightness(20),
+                    onInventory: function () { console.log('inventory') },
+                    onAQuietRoom: function () { console.log('quiet') },
+                    onCode: () => this.handleCode(),
                 }
             }),
         }
         this.tick = this.tick.bind(this);
         this.intervalHandle = setInterval(this.tick, 1000);
-    }
-
-    handleAction() {
-        alert("ACTION!")
     }
 
     tick(){
@@ -177,19 +130,6 @@ export default class Game extends Component {
         }
     }
 
-    handleQuietTransition() {
-        // okay, we're getting to state transitions. I know there's a better way but we're learning :)
-        this.setState({
-            screenKey: "quiet"
-        });
-    }
-
-    handleBack(){
-        this.setState({
-            screenKey: this.state.prevScreenKey
-        })
-    }
-
     handleCode(){
         // should be its own class perhaps, seems to need state to control refresh rate?
         const status= "lines of code: +5";
@@ -202,7 +142,7 @@ export default class Game extends Component {
     }
 
     handleTransition(name){
-        console.log(name);
+        console.log("Taking transition \"" + name + "\"");
         this.state.fsm[`${name}`]();
     }
 
@@ -233,14 +173,6 @@ export default class Game extends Component {
                         transitions={this.state.fsm.transitions()}
                         onTransition={(name) => this.handleTransition(name)}
                     />
-                    <Screen
-                        onClick={() => this.handleAction()}
-                        onQuiet={() => this.handleQuietTransition()}
-                        onBrighten={() => this.handleBrightness(20)}
-                        onCode={() => this.handleCode()}
-                        onBack={() => this.handleBack()}
-                        screenKey={this.state.screenKey}
-                    />
                 </div>
                 {/* <div className="brightness">
                     <Action
@@ -266,3 +198,4 @@ export default class Game extends Component {
         );
     }
 }
+
