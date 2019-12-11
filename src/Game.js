@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { Helmet } from "react-helmet";
 
+// Global variables...
+let gWorkState = "work";
+
 function Action(props) {
     return (
         <button type="button" className="action" onClick={props.onClick}>
@@ -15,17 +18,19 @@ class Actionz extends React.Component {
 
         // Outer loop to create parent
         let transitions = this.props.transitions;
-        let actions = this.props.actions;
         for (let i = 0; i < transitions.length; i++){
             let children = []
-            // Inner loop to create children
-            children.push(<td>
-                <Action
-                    actionText={transitions[i]}
-                    onClick={() => this.props.onTransition(transitions[i])}
-                /></td>)
-            //Create the parent and add the children
-            table.push(<tr>{children}</tr>)
+            // if((this.props.hidden[transitions[i]] == 'null') && (this.props.hidden[transitions[i]] != false)){
+            if(this.props.hidden[transitions[i]] !== true) {
+                // Inner loop to create children
+                children.push(<td>
+                    <Action
+                        actionText={transitions[i]}
+                        onClick={() => this.props.onTransition(transitions[i])}
+                    /></td>)
+                //Create the parent and add the children
+                table.push(<tr>{children}</tr>)
+            }
         }
         return table
     }
@@ -64,6 +69,7 @@ class Dialog extends React.Component {
     }
 }
 
+
 export default class Game extends Component {
     constructor(props){
         super(props);
@@ -75,33 +81,49 @@ export default class Game extends Component {
             lastActionTick: 0,
             brightness: 30, 
             soliloquyRB: new RingBuffer(5),
-            screenKey: "home",
-            prevScreenKey: "home",
+            hidden: {'team':true},
+
             codeXP: 0,
+            money: 0,
+
             fsm: new StateMachine({
                 init: 'home',
                 transitions: [
                     /* Transitions */
                     { name: 'a quiet room', from: 'home', to: 'quiet' },
                     { name: 'inventory', from: 'home', to: 'inventory' },
+                    { name: 'work', from: 'home', to: function(){ return gWorkState }},
+                    { name: 'team', from: 'home', to: 'team' },
+                    { name: "code a simple search engine", from: 'work', to: () => { if(this.handleSimpleSearchEngine('search')) return gWorkState; else return 'work'; } },
+                    { name: "code a humble online book store", from: 'work', to: () => { if(this.handleSimpleSearchEngine('book')) return 'home2'; else return 'work'; } },
+                    { name: "code a tiny social network", from: 'work', to: () => { if(this.handleSimpleSearchEngine('social')) return gWorkState; else return 'work'; } },
                     /* Going back */
-                    { name: 'back', from: 'quiet', to: 'home' },
-                    { name: 'back', from: 'inventory', to: 'home' },
+                    { name: 'back', from: ['quiet','inventory','work','search','book', 'social', 'team'], to: 'home' },
                     /* Actions, implemented as state transitions to self */
                     { name: 'brighten', from: 'home', to: 'home' },
                     { name: 'code', from: 'quiet', to: 'quiet' },
+                    { name: 'create a stylish frontend', from: 'search', to: 'search' },
+                    { name: 'create a stylish frontend', from: 'search', to: 'search' },
+                    { name: 'create a robust backend', from: 'search', to: 'search' },
+                    { name: 'optimization', from: 'search', to: 'search' },
                 ],
                 methods: {
                     onBrighten: () => this.handleBrightness(20),
-                    onInventory: function () { console.log('inventory') },
-                    onAQuietRoom: function () { console.log('quiet') },
                     onCode: () => this.handleCode(),
+                    "onCode a humble online book store": () => this.handleBookstore(),
+                    "onCode a tiny social network": () => this.handleSocialNetwork(),
                 }
             }),
         }
+
         this.tick = this.tick.bind(this);
         this.intervalHandle = setInterval(this.tick, 1000);
+
+        // Uncomment me for vizualization! Then execute dot -Tps derp.dot -o graph.ps 
+        // var visualize = require('javascript-state-machine/lib/visualize');
+        // console.log(visualize(this.state.fsm));
     }
+
 
     tick(){
         // This is probably such a horrible newbie way to tick...but here it is!
@@ -130,6 +152,52 @@ export default class Game extends Component {
         }
     }
 
+    handleInventory(){
+        //TODO: Update action area with inventory
+    }
+
+    handleBookstore(){
+    }
+
+    handleSocialNetwork(){
+    }
+
+    handleSimpleSearchEngine(selectWork){
+        let soliloquy = this.state.soliloquyRB;
+        let codeXP = this.state.codeXP;
+        let money = this.state.money;
+        let hidden = this.state.hidden;
+        let transitionSuccess = false;
+
+        const searchEngineLOC = 30;
+        const reward = 5;
+        console.log("handleSimpleSearchEngine!");
+
+        if(this.state.codeXP >= searchEngineLOC){
+            soliloquy.enq(selectWork + " built!");
+            soliloquy.enq("$$$: +" + reward);
+            soliloquy.enq("...can we make it better?");
+            codeXP -= reward;
+            money += reward;
+            gWorkState = selectWork;
+            delete hidden['team']; // show team!
+            transitionSuccess = true;
+        }
+        else {
+            soliloquy.enq("Not enough code..."); 
+            soliloquy.enq("Need " + (searchEngineLOC - codeXP) + " LOC.");
+        }
+
+        this.setState({
+            codeXP: codeXP,
+            money: money,
+            soliloquyRB: soliloquy,
+            hidden: hidden,
+        })
+
+        return transitionSuccess;
+    }
+
     handleCode(){
         // should be its own class perhaps, seems to need state to control refresh rate?
         const status= "lines of code: +5";
@@ -143,7 +211,19 @@ export default class Game extends Component {
 
     handleTransition(name){
         console.log("Taking transition \"" + name + "\"");
-        this.state.fsm[`${name}`]();
+        console.log("this.state.fsm[\"" + name +"\"]");
+        console.log(this.state.fsm.allTransitions());
+        console.log(this.state.fsm.allStates());
+        console.log("current state: "+ this.state.fsm.state);
+        let fn_name = "search engine temecula long";
+        if (typeof this.state.fsm[`${name}`] === "function")
+        {
+            console.log(name + " valid!");
+            this.state.fsm[`${name}`]();
+        }
+        else {
+            console.log(fn_name  + " invalid!");
+        }
     }
 
     handleBrightness(brightness) {
@@ -171,6 +251,7 @@ export default class Game extends Component {
                 <div className="actions">
                     <Actionz
                         transitions={this.state.fsm.transitions()}
+                        hidden={this.state.hidden}
                         onTransition={(name) => this.handleTransition(name)}
                     />
                 </div>
