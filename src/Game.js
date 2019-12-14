@@ -77,19 +77,21 @@ export default class Game extends Component {
 
         this.state = {
             tick: 0,
+            endTick: 0,
             lastActionTick: 0,
             brightness: 30, 
+            dimRate: -0.3, 
             soliloquyRB: new RingBuffer(6),
             hidden: {'team':true, 'a simple search engine':true, 'a humble book store':true, 'a tiny social network':true},
             disabled: {},
             engineers: {'frontend':0, 'backend':0, 'optimization':0},
+            loan: {'amount': 0, 'interestPct': 30},
 
             codeXP: 0,
             money: 0,
             users: 0,
             adoptionRate: 1,
             tippingPoint: false,
-            endTick: 0,
 
             fsm: new StateMachine({
                 init: 'home',
@@ -158,29 +160,26 @@ export default class Game extends Component {
         let soliloquyRB = this.state.soliloquyRB;
         let money = this.state.money;
         let engineers = this.state.engineers;
-        let cost = 5;
+        let cost = 100;
 
         if(money >=  cost)
         {
             switch(position){
                 case "frontend": 
                 {
-                    soliloquyRB.enq("Frontend Engineer hired!");
-                    money -= cost;
+                    soliloquyRB.enq("Frontend Engineer hired at rate of $108/hr!");
                     engineers[position] += 1;
                     break;
                 }
                 case "backend": 
                 {
-                    soliloquyRB.enq("Backend Engineer hired!");
-                    money -= cost;
+                    soliloquyRB.enq("Backend Engineer hired at rate of $108/hr!");
                     engineers[position] += 1;
                     break;
                 }
                 case "optimization": 
                 {
-                    soliloquyRB.enq("Optimization Engineer hired!");
-                    money -= cost;
+                    soliloquyRB.enq("Optimization Engineer hired at rate of $108/hr!");
                     engineers[position] += 1;
                     break;
                 }
@@ -192,7 +191,7 @@ export default class Game extends Component {
             }
         }
         else{
-            soliloquyRB.enq("Too poor to hire. Need $" + (cost - money));
+            soliloquyRB.enq("Too poor to hire. Need $" + (cost - money)+". Consider a temp job.");
         }
 
         this.setState({
@@ -267,10 +266,13 @@ export default class Game extends Component {
         let userRequirement = (this.state.engineers['frontend'] > 3);
         let money = this.state.money;
         let users = this.state.users;
+        let brightness = this.state.brightness;
+        let dimRate = this.state.dimRate;
         let adoptionRate = this.state.adoptionRate;
         let tippingPoint = this.state.tippingPoint;
         let disabled = this.state.disabled;
-        let autodimRate = -0.3;
+        let engineers = this.state.engineers;
+        let loan = this.state.loan;
 
         if(tick === 1){
             soliloquyRB.enq("Can't see.");
@@ -280,6 +282,33 @@ export default class Game extends Component {
         }
         else if(tick === 7) {
             soliloquyRB.enq("Eyes are tired.");
+        }
+
+        for (const [position, count] of Object.entries(engineers)) {
+            const ongoingCost = -0.3;
+            if(count !== 0){
+                if(money > ongoingCost){
+                    money += (ongoingCost * count);
+                }
+                else{
+                    if(!tippingPoint){
+                        loan.amount += 1000;
+                        soliloquyRB.enq("Ran out of money.");
+                        soliloquyRB.enq("Took a loan for " + loan.amount + " @ " + loan.interestPct + "% to make payroll for " + position +  "...will pay interest.");
+                        soliloquyRB.enq("Need to start making money...the pressure is immense!");
+                        money += loan.amount;
+                    }
+                    else{
+                        money = 0;
+                    }
+                }
+            }
+        }
+
+        if(loan.amount > 0){
+            let annualCost = ((loan.amount) * (loan.interestPct)) / 100; // interest-only payments
+            let ongoingCost = annualCost / (52 * 40);
+            money -= ongoingCost;
         }
 
         if(userRequirement) {
@@ -306,29 +335,42 @@ export default class Game extends Component {
                 disabled['brighten'] = true;
             }
 
-            if (tick === (endTick + 1)) {
-                soliloquyRB.enq("Can’t pay employees.");
+            if (tick === (endTick + 3)) {
+                soliloquyRB.enq("Can’t pay employees...");
             }
-            else if (tick === (endTick + 3)) {
-                soliloquyRB.enq("Lost the trust of the users.");
+            else if (tick === (endTick + 5)) {
+                soliloquyRB.enq("...the bank owns everything.");
             }
             else if (tick === (endTick + 7)) {
+                soliloquyRB.enq("Won't give us any more money.");
+            }
+            else if (tick === (endTick + 10)) {
+                soliloquyRB.enq("Lost the trust of the users.");
+            }
+            else if (tick === (endTick + 13)) {
                 soliloquyRB.enq("Took advantage of them.");
             }
-            else if (tick === (endTick + 11)) {
+            else if (tick === (endTick + 16)) {
                 soliloquyRB.enq("Can’t even afford my electricity bill...");
-                autodimRate = -1;
+                dimRate += -3;
             }
+        }
+
+        brightness += dimRate;
+        if(brightness <= 0){
+            brightness = 0;
         }
 
         this.setState({
            tick: this.state.tick + 1,
            endTick: endTick,
            lastActionTick: this.state.lastActionTick + 1,
-           brightness: this.state.brightness + autodimRate,
+           dimRate: dimRate,
+           brightness: brightness,
            users: users,
            adoptionRate: adoptionRate,
            tippingPoint: tippingPoint,
+           money: money,
         });
     }
 
