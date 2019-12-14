@@ -86,6 +86,10 @@ export default class Game extends Component {
 
             codeXP: 0,
             money: 0,
+            users: 0,
+            adoptionRate: 1,
+            tippingPoint: false,
+            endTick: 0,
 
             fsm: new StateMachine({
                 init: 'home',
@@ -97,9 +101,9 @@ export default class Game extends Component {
                     { name: 'team', from: 'home', to: 'team' },
                     { name: "code a simple search engine", from: 'work', to: 'work'},
                     { name: "a simple search engine", from: 'work', to: 'search'},
-                    { name: "code a humble book store", from: 'work', to: 'work'},
+                    // { name: "code a humble book store", from: 'work', to: 'work'},
                     { name: "a humble book store", from: 'work', to: 'book'},
-                    { name: "code a tiny social network", from: 'work', to: 'work'},
+                    // { name: "code a tiny social network", from: 'work', to: 'work'},
                     { name: "a tiny social network", from: 'work', to: 'social'},
                     { name: "code for some BS temp job", from: 'work', to: 'bs' },
                     /* Going back */
@@ -255,37 +259,86 @@ export default class Game extends Component {
     }
 
     tick(){
-        // This is probably such a horrible newbie way to tick...but here it is!
-        this.setState({
-           tick: this.state.tick + 1,
-           lastActionTick: this.state.lastActionTick + 1,
-           brightness: this.state.brightness - 0.3,
-        });
-
         // If this is anything like an embedded system...shouldn't run code in an interrupt handler. 
         // However, I've found that using the tick value isn't "thread safe" unless I update logic
         let soliloquyRB= this.state.soliloquyRB;
-        if(this.state.tick === 1){
+        let tick = this.state.tick;
+        let endTick = this.state.endTick;
+        let userRequirement = (this.state.engineers['frontend'] > 3);
+        let money = this.state.money;
+        let users = this.state.users;
+        let adoptionRate = this.state.adoptionRate;
+        let tippingPoint = this.state.tippingPoint;
+        let disabled = this.state.disabled;
+        let autodimRate = -0.3;
+
+        if(tick === 1){
             soliloquyRB.enq("Can't see.");
         }
-        else if(this.state.tick === 3) {
+        else if(tick === 3) {
             soliloquyRB.enq("Screen is dim.");
         }
-        else if(this.state.tick === 7) {
+        else if(tick === 7) {
             soliloquyRB.enq("Eyes are tired.");
         }
-        else if(this.state.tick === 10) {
-            soliloquyRB.enq("...productivity falling.");
+
+        if(userRequirement) {
+            users += adoptionRate;
+            adoptionRate += 1;
         }
-        else{
+
+        if(users > 1000){
+            if(!tippingPoint)
+            {
+                soliloquyRB.enq("Reached the tipping point for number of users! We can't fail now.");
+            }
+            tippingPoint = true;
         }
+
+        if(tippingPoint){
+            adoptionRate -= 3;
+            if(users <= 0){
+                users = 0;
+            }
+
+            if((money <= 0) && (endTick === 0)){
+                endTick = tick;
+                disabled['brighten'] = true;
+            }
+
+            if (tick === (endTick + 1)) {
+                soliloquyRB.enq("Can’t pay employees.");
+            }
+            else if (tick === (endTick + 3)) {
+                soliloquyRB.enq("Lost the trust of the users.");
+            }
+            else if (tick === (endTick + 7)) {
+                soliloquyRB.enq("Took advantage of them.");
+            }
+            else if (tick === (endTick + 11)) {
+                soliloquyRB.enq("Can’t even afford my electricity bill...");
+                autodimRate = -1;
+            }
+        }
+
+        this.setState({
+           tick: this.state.tick + 1,
+           endTick: endTick,
+           lastActionTick: this.state.lastActionTick + 1,
+           brightness: this.state.brightness + autodimRate,
+           users: users,
+           adoptionRate: adoptionRate,
+           tippingPoint: tippingPoint,
+        });
     }
 
     handleInventory(){
         let soliloquyRB = this.state.soliloquyRB;
+        let users = this.state.users;
 
-        soliloquyRB.enq("$: " + this.state.money);
+        if((users > 0) || this.state.tippingPoint) soliloquyRB.enq("users: " + this.state.users);
         soliloquyRB.enq("lines of code: " + this.state.codeXP);
+        soliloquyRB.enq("$: " + this.state.money);
         //TODO: Only show as earned...
         // soliloquyRB.enq("backend engineers: " + this.state.codeXP);
 
