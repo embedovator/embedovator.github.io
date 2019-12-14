@@ -9,6 +9,35 @@ function Action(props) {
     )
 }
 
+class Inventory extends React.Component {
+    createTable = () => {
+        if(this.props.show){
+            let table = []
+            let state = this.props.state;
+
+            if(false){
+                for (const [key, value] of Object.entries(state)) {
+                    let children = []
+                    children.push(<td>OHAI</td>)
+                    //    {key}: {value}
+                    table.push(<tr>{children}</tr>)
+                }
+            }
+            return table
+        }
+    }
+
+    render() {
+        return (
+            <div>
+                <table>
+                    {this.createTable()}
+                </table>
+            </div>
+        )
+    }
+}
+
 class Actionz extends React.Component {
     createTable = () => {
         let table = []
@@ -77,21 +106,24 @@ export default class Game extends Component {
 
         this.state = {
             tick: 0,
-            endTick: 0,
+            workEndTick: 0,
             lastActionTick: 0,
             brightness: 30, 
             dimRate: -0.3, 
             soliloquyRB: new RingBuffer(6),
-            hidden: {'team':true, 'a simple search engine':true, 'a humble book store':true, 'a tiny social network':true, 'monetize users': true},
+            hidden: {'team':true, 'a simple search engine':true, 'a humble book store':true, 'a tiny social network':true, 'monetize users': true, 'contribute':true},
             disabled: {},
             engineers: {'frontend':0, 'backend':0, 'optimization':0},
+            contributors: 0,
             loan: {'amount': 0, 'interestPct': 30},
 
+            contributeEndTick: 0,
             codeXP: 0,
             money: 0,
             users: 0,
             adoptionRate: 1,
             tippingPoint: false,
+            worked: false,
 
             fsm: new StateMachine({
                 init: 'home',
@@ -100,6 +132,7 @@ export default class Game extends Component {
                     { name: 'a quiet room', from: 'home', to: 'quiet' },
                     { name: 'inventory', from: 'home', to: 'inventory' },
                     { name: 'work', from: 'home', to: 'work'},
+                    { name: 'contribute', from: 'home', to: 'contribute'},
                     { name: 'team', from: 'home', to: 'team' },
                     { name: "code a simple search engine", from: 'work', to: 'work'},
                     { name: "a simple search engine", from: 'work', to: 'search'},
@@ -109,10 +142,13 @@ export default class Game extends Component {
                     { name: "a tiny social network", from: 'work', to: 'social'},
                     { name: "code for some BS temp job", from: 'work', to: 'bs' },
                     /* Going back */
-                    { name: 'back', from: ['quiet','inventory','work','search','book', 'social', 'team', 'bs'], to: 'home' },
+                    { name: 'back', from: ['quiet','inventory','work','search','book', 'social', 'team', 'bs', 'contribute'], to: 'home' },
                     /* Actions, implemented as state transitions to self */
                     { name: 'brighten', from: 'home', to: 'home' },
                     { name: 'code', from: 'quiet', to: 'quiet' },
+                    { name: 'blockstack', from: 'contribute', to: 'contribute' },
+                    { name: 'ethereum', from: 'contribute', to: 'contribute' },
+                    { name: 'bitcoin', from: 'contribute', to: 'contribute' },
                     { name: 'fix legacy code', from: 'bs', to: () => {this.handleBSWork(); return 'bs'}},
                     { name: 'write more lolcode', from: 'bs', to: () => {this.handleBSWork(); return 'bs'}},
                     { name: 'compile', from: 'bs', to: () => {this.handleBSWork(); return 'bs'}},
@@ -139,6 +175,9 @@ export default class Game extends Component {
                     "onCreate a robust backend": () => this.handleSearchWork('backend'),
                     "onOptimization!": () => this.handleSearchWork('optimization'),
                     "onMonetize users": () => this.handleMonetization(),
+                    onBlockstack: () => this.handleContribute('blockstack'),
+                    onEthereum: () => this.handleContribute('ethereum'),
+                    onBitcoin: () => this.handleContribute('bitcoin'),
                 }
             }),
         }
@@ -151,22 +190,121 @@ export default class Game extends Component {
         // console.log(visualize(this.state.fsm));
     }
 
+    handleContribute(project){
+        let loc = this.state.codeXP;
+        let soliloquyRB = this.state.soliloquyRB;
+        let contributors = this.state.contributors;
+        let dimRate = this.state.dimRate;
+        let contributeEndTick = this.state.contributeEndTick;
+        let tick = this.state.tick;
+        let disabled = this.state.disabled;
+
+        switch(project){
+            case 'blockstack':
+            {
+                let locRequirement = 500;
+                if(loc >= locRequirement){
+                    disabled[project] = true;
+                    loc -= locRequirement;
+                    // soliloquyRB.enq("Built a really bad game on Blockstack...and had fun!");
+                    soliloquyRB.enq("*really bad game on Blockstack goes viral*");
+                    contributors += 50;
+                }
+                else{
+                    soliloquyRB.enq("Not enough code..."); 
+                    soliloquyRB.enq("Need " + (locRequirement - loc) + " LOC.");
+                }
+                break;
+            }
+            case 'ethereum':
+            {
+                let locRequirement = 5000;
+                if(loc >= locRequirement){
+                    disabled[project] = true;
+                    loc -= locRequirement;
+                    soliloquyRB.enq("VB: Thanks for everything you’ve done, dad.");
+                    contributors += 1000;
+                }
+                else{
+                    soliloquyRB.enq("Not enough code..."); 
+                    soliloquyRB.enq("Need " + (locRequirement - loc) + " LOC.");
+                }
+
+                break;
+            }
+            case 'bitcoin':
+            {
+
+                let locRequirement = 50000;
+                if(loc >= locRequirement){
+                    disabled[project] = true;
+                    loc -= locRequirement;
+                    contributors += 10000;
+                    contributeEndTick = tick;
+                }
+                else{
+                    soliloquyRB.enq("Not enough code..."); 
+                    soliloquyRB.enq("Need " + (locRequirement - loc) + " LOC.");
+                }
+                break;
+            }
+
+            default:
+            {
+                break;
+            }
+        }
+
+        this.setState({
+            soliloquyRB: soliloquyRB,
+            codeXP: loc,
+            contributors: contributors,
+            dimRate: dimRate,
+            contributeEndTick: contributeEndTick,
+            disabled: disabled,
+        })
+    }
+
     handleBSWork(){
+        let loc = this.state.codeXP;
+        let money = this.state.money;
+        let soliloquyRB = this.state.soliloquyRB;
+        let worked = this.state.worked;
+
+        const reqLOC = 10;
+        const reward = 5;
+
+        if(loc >= reqLOC){
+            worked = true;
+            money += reward;
+            loc -= reqLOC;
+            soliloquyRB.enq("Unfulfilling work done. Got $" + reward);
+        }
+        else {
+            soliloquyRB.enq("Not enough code..."); 
+            soliloquyRB.enq("Need " + (reqLOC - loc) + " LOC.");
+        }
+ 
         this.setState(
         {
-            money: this.state.money + 5
+            codeXP: loc,
+            money: money,
+            soliloquyRB: soliloquyRB,
+            worked: worked,
         });
     }
 
     handleMonetization(){
         let money = this.state.money;
         let monetization = (this.state.users * 5);
+        let adoptionRate = this.state.adoptionRate;
         console.log("Got money for having users: " + monetization);
 
         money += monetization;
 
         this.setState({
             money:money,
+            adoptionRate: adoptionRate - 10,
         });
     }
 
@@ -276,7 +414,7 @@ export default class Game extends Component {
         // However, I've found that using the tick value isn't "thread safe" unless I update logic
         let soliloquyRB= this.state.soliloquyRB;
         let tick = this.state.tick;
-        let endTick = this.state.endTick;
+        let workEndTick = this.state.workEndTick;
         let money = this.state.money;
         let users = this.state.users;
         let brightness = this.state.brightness;
@@ -287,15 +425,40 @@ export default class Game extends Component {
         let engineers = this.state.engineers;
         let loan = this.state.loan;
         let hidden = this.state.hidden;
+        let contributors = this.state.contributors;
+        let loc = this.state.codeXP;
+        let contributeEndTick = this.state.contributeEndTick;
 
         if(tick === 1){
-            soliloquyRB.enq("Can't see.");
+            soliloquyRB.enq("Eyes are tired.");
         }
         else if(tick === 3) {
             soliloquyRB.enq("Screen is dim.");
         }
         else if(tick === 7) {
-            soliloquyRB.enq("Eyes are tired.");
+            soliloquyRB.enq("Can't see.");
+        }
+
+        if(contributors > 0){
+            loc += (contributors);
+
+            if(contributeEndTick > 0){
+                disabled['brighten'] = true;
+
+                if (tick === (contributeEndTick + 2)) {
+                    soliloquyRB.enq("SN: I'm not in this for the glory...son.");
+                }
+                else if (tick === (contributeEndTick + 5)) {
+                    soliloquyRB.enq("SN: I'm here to make a difference.");
+                }
+                else if (tick === (contributeEndTick + 10)) {
+                    soliloquyRB.enq("SN: My eyes are tired now, and I must rest...");
+                    dimRate += -3;
+                }
+                else if (tick === (contributeEndTick + 13)) {
+                    soliloquyRB.enq("*" + contributors + " contributors continue BUIDLing*");
+                }
+            }
         }
 
         for (const [position, count] of Object.entries(engineers)) {
@@ -331,7 +494,7 @@ export default class Game extends Component {
             adoptionRate += 1;
         }
         if(users === 1){
-            soliloquyRB.enq("Got our first user!");
+            alert("Got our first user! Time to monetize on them...");
             delete hidden['monetize users'];
         }
 
@@ -344,32 +507,32 @@ export default class Game extends Component {
         }
 
         if(tippingPoint){
-            adoptionRate -= 3;
+            adoptionRate -= 0.5;
             if(users <= 0){
                 users = 0;
             }
 
-            if((money <= 0) && (endTick === 0)){
-                endTick = tick;
+            if((money <= 0) && (workEndTick === 0)){
+                workEndTick = tick;
                 disabled['brighten'] = true;
             }
 
-            if (tick === (endTick + 3)) {
+            if (tick === (workEndTick + 3)) {
                 soliloquyRB.enq("Can’t pay employees...");
             }
-            else if (tick === (endTick + 5)) {
+            else if (tick === (workEndTick + 5)) {
                 soliloquyRB.enq("...the bank owns everything.");
             }
-            else if (tick === (endTick + 7)) {
+            else if (tick === (workEndTick + 7)) {
                 soliloquyRB.enq("Won't give us any more money.");
             }
-            else if (tick === (endTick + 10)) {
+            else if (tick === (workEndTick + 10)) {
                 soliloquyRB.enq("Lost the trust of the users.");
             }
-            else if (tick === (endTick + 13)) {
+            else if (tick === (workEndTick + 13)) {
                 soliloquyRB.enq("Took advantage of them.");
             }
-            else if (tick === (endTick + 16)) {
+            else if (tick === (workEndTick + 16)) {
                 soliloquyRB.enq("Can’t even afford my electricity bill...");
                 dimRate += -3;
             }
@@ -382,7 +545,7 @@ export default class Game extends Component {
 
         this.setState({
            tick: this.state.tick + 1,
-           endTick: endTick,
+           workEndTick: workEndTick,
            lastActionTick: this.state.lastActionTick + 1,
            dimRate: dimRate,
            brightness: brightness,
@@ -390,6 +553,7 @@ export default class Game extends Component {
            adoptionRate: adoptionRate,
            tippingPoint: tippingPoint,
            money: money,
+           codeXP: loc,
         });
     }
 
@@ -419,11 +583,13 @@ export default class Game extends Component {
         let codeXP = this.state.codeXP;
         let money = this.state.money;
         let hidden = this.state.hidden;
+        let worked = this.state.worked;
 
         const reqLOC = 30;
         const reward = 5;
 
         if(this.state.codeXP >= reqLOC){
+            worked = true;
             switch(selectWork){
                 case 'book':
                 {
@@ -452,8 +618,8 @@ export default class Game extends Component {
                     break;
                 }
             }
-            soliloquyRB.enq("$: +" + reward);
             soliloquyRB.enq("...can we make it better?");
+            soliloquyRB.enq("Got $" + reward);
             codeXP -= reward;
             money += reward;
             delete hidden['team'];
@@ -468,6 +634,7 @@ export default class Game extends Component {
             money: money,
             soliloquyRB: soliloquyRB,
             hidden: hidden,
+            worked: worked,
         })
     }
 
@@ -506,13 +673,39 @@ export default class Game extends Component {
     }
 
     handleCode(){
-        // should be its own class perhaps, seems to need state to control refresh rate?
-        const status= "lines of code: +5";
         let soliloquyRB = this.state.soliloquyRB;
+        let worked = this.state.worked;
+        let loc = this.state.codeXP;
+        let contributors = this.state.contributors;
+        let locRequirement = ((contributors + 1) * 100);
+        let hidden = this.state.hidden;
+        let reward = 5;
+
+
+        loc += reward;
+        const status= "lines of code: +" + reward;
         soliloquyRB.enq(status);
+
+        if(!worked && (loc >= locRequirement))
+        {
+            if(contributors > 0)
+            {
+                contributors += 1;
+                soliloquyRB.enq("Another contributor joins the team");
+            }
+            else
+            {
+                contributors += 1;
+                hidden['work'] = true;
+                delete hidden['contribute'];
+                alert("A contributor joins the team!");
+            }
+        }
+
         this.setState({
-            codeXP: this.state.codeXP + 5,
+            codeXP: loc,
             soliloquyRB: soliloquyRB,
+            contributors,
         })
     }
 
@@ -561,6 +754,10 @@ export default class Game extends Component {
                         hidden={this.state.hidden}
                         disabled={this.state.disabled}
                         onTransition={(name) => this.handleTransition(name)}
+                    />
+                    <Inventory
+                        show={(this.state.fsm.state === 'inventory')}
+                        data={this.state}
                     />
                 </div>
                 {/* <div className="brightness">
