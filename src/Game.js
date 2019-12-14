@@ -82,7 +82,7 @@ export default class Game extends Component {
             brightness: 30, 
             dimRate: -0.3, 
             soliloquyRB: new RingBuffer(6),
-            hidden: {'team':true, 'a simple search engine':true, 'a humble book store':true, 'a tiny social network':true},
+            hidden: {'team':true, 'a simple search engine':true, 'a humble book store':true, 'a tiny social network':true, 'monetize users': true},
             disabled: {},
             engineers: {'frontend':0, 'backend':0, 'optimization':0},
             loan: {'amount': 0, 'interestPct': 30},
@@ -123,6 +123,7 @@ export default class Game extends Component {
                     { name: 'create a simple, modern frontend', from: 'search', to: 'search' },
                     { name: 'create a robust backend', from: 'search', to: 'search' },
                     { name: 'optimization!', from: 'search', to: 'search' },
+                    { name: 'monetize users', from: 'search', to: 'search'},
                 ],
                 methods: {
                     onBrighten: () => this.handleBrightness(20),
@@ -137,6 +138,7 @@ export default class Game extends Component {
                     "onCreate a simple, modern frontend": () => this.handleSearchWork('frontend'),
                     "onCreate a robust backend": () => this.handleSearchWork('backend'),
                     "onOptimization!": () => this.handleSearchWork('optimization'),
+                    "onMonetize users": () => this.handleMonetization(),
                 }
             }),
         }
@@ -153,6 +155,18 @@ export default class Game extends Component {
         this.setState(
         {
             money: this.state.money + 5
+        });
+    }
+
+    handleMonetization(){
+        let money = this.state.money;
+        let monetization = (this.state.users * 5);
+        console.log("Got money for having users: " + monetization);
+
+        money += monetization;
+
+        this.setState({
+            money:money,
         });
     }
 
@@ -263,7 +277,6 @@ export default class Game extends Component {
         let soliloquyRB= this.state.soliloquyRB;
         let tick = this.state.tick;
         let endTick = this.state.endTick;
-        let userRequirement = (this.state.engineers['frontend'] > 3);
         let money = this.state.money;
         let users = this.state.users;
         let brightness = this.state.brightness;
@@ -273,6 +286,7 @@ export default class Game extends Component {
         let disabled = this.state.disabled;
         let engineers = this.state.engineers;
         let loan = this.state.loan;
+        let hidden = this.state.hidden;
 
         if(tick === 1){
             soliloquyRB.enq("Can't see.");
@@ -311,9 +325,14 @@ export default class Game extends Component {
             money -= ongoingCost;
         }
 
+        let userRequirement = (this.state.engineers['frontend'] > 3);
         if(userRequirement) {
             users += adoptionRate;
             adoptionRate += 1;
+        }
+        if(users === 1){
+            soliloquyRB.enq("Got our first user!");
+            delete hidden['monetize users'];
         }
 
         if(users > 1000){
