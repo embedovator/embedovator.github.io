@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/a-dark-screen/static/css/main.8f8cfb68.chunk.css",
+    "main.js": "/a-dark-screen/static/js/main.bd0ce4e8.chunk.js",
+    "main.js.map": "/a-dark-screen/static/js/main.bd0ce4e8.chunk.js.map",
+    "runtime~main.js": "/a-dark-screen/static/js/runtime~main.c594f0f4.js",
+    "runtime~main.js.map": "/a-dark-screen/static/js/runtime~main.c594f0f4.js.map",
+    "static/css/2.64a99b10.chunk.css": "/a-dark-screen/static/css/2.64a99b10.chunk.css",
+    "static/js/2.6ab7ddcc.chunk.js": "/a-dark-screen/static/js/2.6ab7ddcc.chunk.js",
+    "static/js/2.6ab7ddcc.chunk.js.map": "/a-dark-screen/static/js/2.6ab7ddcc.chunk.js.map",
+    "index.html": "/a-dark-screen/index.html",
+    "precache-manifest.3d9600f633d71cc16d9fb8c584c6a287.js": "/a-dark-screen/precache-manifest.3d9600f633d71cc16d9fb8c584c6a287.js",
+    "service-worker.js": "/a-dark-screen/service-worker.js",
+    "static/css/2.64a99b10.chunk.css.map": "/a-dark-screen/static/css/2.64a99b10.chunk.css.map",
+    "static/css/main.8f8cfb68.chunk.css.map": "/a-dark-screen/static/css/main.8f8cfb68.chunk.css.map"
+  }
+}

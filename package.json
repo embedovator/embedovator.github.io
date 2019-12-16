@@ -1,7 +1,8 @@
 {
-  "name": "hello-blockstack",
-  "version": "0.0.0",
-  "description": "A simple Blockstack app using ReactJS",
+  "name": "a-dark-screen",
+  "version": "0.0.1",
+  "homepage": "https://embedovator.github.io/a-dark-screen",
+  "description": "A simple Blockstack game using ReactJS",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/blockstack/hello-blockstack.git"
@@ -23,6 +24,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build",
     "test": "react-scripts build",
     "eject": "react-scripts eject"
   },
@@ -43,6 +46,7 @@
   },
   "devDependencies": {
     "bootstrap": "^4.3.1",
+    "gh-pages": "^2.1.1",
     "javascript-state-machine": "^3.1.0",
     "react-test-renderer": "^16.8.6"
   }
