@@ -17,6 +17,7 @@
   justify-content: center;
   vertical-align: middle;
   background-color: var(--primary);
+  text-transform: lowercase;
 }
 
 :root {
@@ -51,6 +52,7 @@
   /* align-items: center; */
   justify-content: center;
   vertical-align: middle;
+  text-transform: lowercase;
 }
 
 button {
@@ -68,6 +70,7 @@ button {
 	/* font-size:10px; */
 	/* font-weight:bold; */
 	padding:1px 10px;
+  text-transform: lowercase;
 }
 button:hover {
 	background-color:#f6f6f6;
