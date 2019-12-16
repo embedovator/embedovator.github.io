@@ -710,19 +710,12 @@ export default class Game extends Component {
     }
 
     handleTransition(name){
-        console.log("Taking transition \"" + name + "\"");
-        console.log("this.state.fsm[\"" + name +"\"]");
-        console.log(this.state.fsm.allTransitions());
-        console.log(this.state.fsm.allStates());
-        console.log("current state: "+ this.state.fsm.state);
-        let fn_name = "search engine temecula long";
         if (typeof this.state.fsm[`${name}`] === "function")
         {
-            console.log(name + " valid!");
             this.state.fsm[`${name}`]();
         }
         else {
-            console.log(fn_name  + " invalid!");
+            console.log("function '" + name + "' is invalid!");
         }
     }
 
