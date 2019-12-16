@@ -107,7 +107,7 @@ export default class Game extends Component {
         this.state = {
             tick: 0,
             workEndTick: 0,
-            lastActionTick: 0,
+            brightnessTick: 0,
             brightness: 30, 
             dimRate: -0.3, 
             soliloquyRB: new RingBuffer(6),
@@ -117,6 +117,7 @@ export default class Game extends Component {
             contributors: 0,
             loan: {'amount': 0, 'interestPct': 30},
 
+            saveEnabled: false,
             contributeEndTick: 0,
             codeXP: 0,
             money: 0,
@@ -428,6 +429,7 @@ export default class Game extends Component {
         let contributors = this.state.contributors;
         let loc = this.state.codeXP;
         let contributeEndTick = this.state.contributeEndTick;
+        let saveEnabled = this.state.saveEnabled;
 
         if(tick === 1){
             soliloquyRB.enq("Eyes are tired.");
@@ -437,6 +439,9 @@ export default class Game extends Component {
         }
         else if(tick === 7) {
             soliloquyRB.enq("Can't see.");
+        }
+        else if(tick === 20){
+            saveEnabled = true;
         }
 
         if(contributors > 0){
@@ -546,7 +551,7 @@ export default class Game extends Component {
         this.setState({
            tick: this.state.tick + 1,
            workEndTick: workEndTick,
-           lastActionTick: this.state.lastActionTick + 1,
+           brightnessTick: this.state.brightnessTick + 1,
            dimRate: dimRate,
            brightness: brightness,
            users: users,
@@ -554,6 +559,7 @@ export default class Game extends Component {
            tippingPoint: tippingPoint,
            money: money,
            codeXP: loc,
+           saveEnabled: saveEnabled,
         });
     }
 
@@ -719,21 +725,34 @@ export default class Game extends Component {
         }
     }
 
-    handleBrightness(brightness) {
-        if((this.state.brightness + brightness) <= 0){
-            this.setState({
-                brightness: 0,
-            });
+    handleBrightness(brightnessChange) {
+        let brightness = this.state.brightness;
+        let soliloquyRB = this.state.soliloquyRB;
+        let brightnessTick = this.state.brightnessTick;
+        let saveEnabled = this.state.saveEnabled;
+        let saveGame = this.props.onSave;
+
+        if((brightness + brightnessChange) <= 0){
+            brightness = 0;
         }
         else {
-            if(this.state.lastActionTick >= 3)
+            if(brightnessTick >= 3)
             {
-                this.setState({
-                    brightness: this.state.brightness + brightness,
-                    lastActionTick: 0,
-                });
+                if(saveEnabled){
+                    saveGame();
+                    soliloquyRB.enq("game saved.")
+                }
+
+                brightness += brightnessChange;
+                brightnessTick = 0;
             }
         }
+
+        this.setState({
+            brightness: brightness,
+            brightnessTick: brightnessTick,
+            soliloquyRB: soliloquyRB,
+        });
     }
 
     render() {
@@ -753,11 +772,11 @@ export default class Game extends Component {
                         data={this.state}
                     />
                 </div>
-                {/* <div className="brightness">
+                {/* <div className="save">
                     <Action
-                        // onClick={() => this.props.onSave()} // eventually handle saving
-                        onClick={() => this.handleBrightness(20)}
-                        actionText="brighten"
+                        onClick={() => this.props.onSave()} // eventually handle saving
+                        // onClick={() => this.handleBrightness(20)}
+                        actionText="save"
                     />
                 </div> */}
                 <div className="soliloquy">
