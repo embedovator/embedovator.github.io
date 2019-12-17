@@ -14,6 +14,7 @@
   "license": "MIT",
   "dependencies": {
     "blockstack": "^19.2.5",
+    "clone-deep": "^4.0.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-helmet": "^5.2.1",

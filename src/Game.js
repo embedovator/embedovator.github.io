@@ -101,6 +101,7 @@ class Dialog extends React.Component {
 export default class Game extends Component {
     constructor(props){
         super(props);
+
         var RingBuffer = require('ringbufferjs');
         var StateMachine = require('javascript-state-machine');
 
@@ -116,7 +117,7 @@ export default class Game extends Component {
             engineers: {'frontend':0, 'backend':0, 'optimization':0},
             contributors: 0,
             loan: {'amount': 0, 'interestPct': 30},
-
+            lastState: 'home',
             saveEnabled: false,
             contributeEndTick: 0,
             codeXP: 0,
@@ -125,6 +126,7 @@ export default class Game extends Component {
             adoptionRate: 1,
             tippingPoint: false,
             worked: false,
+            gameData: 0,
 
             fsm: new StateMachine({
                 init: 'home',
@@ -161,10 +163,14 @@ export default class Game extends Component {
                     { name: 'create a robust backend', from: 'search', to: 'search' },
                     { name: 'optimization!', from: 'search', to: 'search' },
                     { name: 'monetize users', from: 'search', to: 'search'},
+                    { name: 'reset game!', from: 'inventory', to: 'sure'},
+                    { name: 'yes, reset.', from: 'sure', to: 'home'},
+                    { name: 'no. do not.', from: 'sure', to: 'inventory'},
                 ],
                 methods: {
                     onBrighten: () => this.handleBrightness(20),
                     onCode: () => this.handleCode(),
+                    "onYes, reset.": () => this.resetGame(),
                     onEnterInventory: () => this.handleInventory(),
                     "onHire a frontend engineer": () => this.handleHire("frontend"),
                     "onHire a backend engineer": () => this.handleHire("backend"),
@@ -185,6 +191,9 @@ export default class Game extends Component {
 
         this.tick = this.tick.bind(this);
         this.intervalHandle = setInterval(this.tick, 1000);
+
+        // preserve the initial state in a new object
+        this.baseState = this.state 
 
         // Uncomment me for vizualization! Then execute dot -Tps derp.dot -o graph.ps 
         // var visualize = require('javascript-state-machine/lib/visualize');
@@ -410,6 +419,7 @@ export default class Game extends Component {
         });
     }
 
+
     tick(){
         // If this is anything like an embedded system...shouldn't run code in an interrupt handler. 
         // However, I've found that using the tick value isn't "thread safe" unless I update logic
@@ -440,7 +450,7 @@ export default class Game extends Component {
         else if(tick === 7) {
             soliloquyRB.enq("Can't see.");
         }
-        else if(tick === 20){
+        else if(tick === 2){
             saveEnabled = true;
         }
 
@@ -466,22 +476,24 @@ export default class Game extends Component {
             }
         }
 
-        for (const [position, count] of Object.entries(engineers)) {
-            const ongoingCost = -0.3;
-            if(count !== 0){
-                if(money > ongoingCost){
-                    money += (ongoingCost * count);
-                }
-                else{
-                    if(!tippingPoint){
-                        loan.amount += 1000;
-                        soliloquyRB.enq("Ran out of money.");
-                        soliloquyRB.enq("Took a loan for " + loan.amount + " @ " + loan.interestPct + "% to make payroll for " + position +  "...will pay interest.");
-                        soliloquyRB.enq("Need to start making money...the pressure is immense!");
-                        money += loan.amount;
+        if(engineers in window){
+            for (const [position, count] of Object.entries(engineers)) {
+                const ongoingCost = -0.3;
+                if(count !== 0){
+                    if(money > ongoingCost){
+                        money += (ongoingCost * count);
                     }
                     else{
-                        money = 0;
+                        if(!tippingPoint){
+                            loan.amount += 1000;
+                            soliloquyRB.enq("Ran out of money.");
+                            soliloquyRB.enq("Took a loan for " + loan.amount + " @ " + loan.interestPct + "% to make payroll for " + position +  "...will pay interest.");
+                            soliloquyRB.enq("Need to start making money...the pressure is immense!");
+                            money += loan.amount;
+                        }
+                        else{
+                            money = 0;
+                        }
                     }
                 }
             }
@@ -725,12 +737,52 @@ export default class Game extends Component {
         }
     }
 
+    saveGame() {
+        const { userSession } = this.props
+        this.setState({
+            lastState: this.state.fsm.state,
+        })
+
+        let gameData = this.state;
+        let backupFSM = this.state.fsm;
+        delete gameData.fsm;
+        console.log("Writing gameData: " + JSON.stringify(gameData));
+        userSession.putFile('a-dark-room.json', JSON.stringify(gameData));
+        this.setState({
+            fsm: backupFSM,
+        })
+    }
+
+    restoreGame() {
+        const { userSession } = this.props
+
+        console.log("Reading gameData...");
+
+        userSession.getFile('a-dark-room.json')
+            .then((file) => {
+                var gameData = JSON.parse(file || '[]')
+                console.log("Restore: " + file);
+                delete gameData.soliloquyRB; // doesn't like to be restored
+                this.setState(gameData);
+            })
+            .finally(() => {
+                console.log("Done restoring");
+            })
+    }
+
+    resetGame(){
+        this.setState(this.baseState);
+    }
+
+    componentDidMount() {
+        this.restoreGame()
+    }
+
     handleBrightness(brightnessChange) {
         let brightness = this.state.brightness;
         let soliloquyRB = this.state.soliloquyRB;
         let brightnessTick = this.state.brightnessTick;
         let saveEnabled = this.state.saveEnabled;
-        let saveGame = this.props.onSave;
 
         if((brightness + brightnessChange) <= 0){
             brightness = 0;
@@ -739,7 +791,8 @@ export default class Game extends Component {
             if(brightnessTick >= 3)
             {
                 if(saveEnabled){
-                    saveGame();
+                    //TODO: Save game
+                    this.saveGame();
                     soliloquyRB.enq("game saved.")
                 }
 

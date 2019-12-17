@@ -13,15 +13,6 @@ const userSession = new UserSession({ appConfig: appConfig })
 export default class App extends Component {
   constructor(props){
     super(props);
-    this.state = {
-      saveGame: false
-    }
-  }
-
-  handleSave() {
-      this.setState({
-        saveGame: true,
-      });
   }
 
   handleSignIn(e) {
@@ -38,13 +29,9 @@ export default class App extends Component {
     return (
       <div className="site-wrapper">
         <div className="site-wrapper-inner">
-          {this.state.saveGame ? 
-            !userSession.isUserSignedIn() ?
-              <Signin userSession={userSession} handleSignIn={ this.handleSignIn } />
-              : <Profile userSession={userSession} handleSignOut={ this.handleSignOut } />
-            : <Game 
-                onSave={() => this.handleSave()} 
-               />
+          {!userSession.isUserSignedIn() ?
+            <Signin userSession={userSession} handleSignIn={this.handleSignIn} />
+            : <Game userSession={userSession} handleSignOut={this.handleSignOut} />
           }
         </div>
       </div>
