@@ -163,14 +163,10 @@ export default class Game extends Component {
                     { name: 'create a robust backend', from: 'search', to: 'search' },
                     { name: 'optimization!', from: 'search', to: 'search' },
                     { name: 'monetize users', from: 'search', to: 'search'},
-                    { name: 'reset game!', from: 'inventory', to: 'sure'},
-                    { name: 'yes, reset.', from: 'sure', to: 'home'},
-                    { name: 'no. do not.', from: 'sure', to: 'inventory'},
                 ],
                 methods: {
                     onBrighten: () => this.handleBrightness(20),
                     onCode: () => this.handleCode(),
-                    "onYes, reset.": () => this.resetGame(),
                     onEnterInventory: () => this.handleInventory(),
                     "onHire a frontend engineer": () => this.handleHire("frontend"),
                     "onHire a backend engineer": () => this.handleHire("backend"),
@@ -791,7 +787,6 @@ export default class Game extends Component {
             if(brightnessTick >= 3)
             {
                 if(saveEnabled){
-                    //TODO: Save game
                     this.saveGame();
                     soliloquyRB.enq("game saved.")
                 }
@@ -813,6 +808,22 @@ export default class Game extends Component {
 
         return (
             <div className="game-area">
+                <div className="game">
+                    <button
+                        className="btn btn-sm"
+                        id="signout-button"
+                        onClick={this.props.handleSignOut.bind(this)}
+                    >
+                        logout
+                    </button>
+                    <button
+                        className="btn btn-sm"
+                        id="signout-button"
+                        onClick={this.resetGame}
+                    >
+                        reset
+                    </button>
+                </div>
                 <div className="actions">
                     <Actionz
                         transitions={this.state.fsm.transitions()}
@@ -825,13 +836,7 @@ export default class Game extends Component {
                         data={this.state}
                     />
                 </div>
-                {/* <div className="save">
-                    <Action
-                        onClick={() => this.props.onSave()} // eventually handle saving
-                        // onClick={() => this.handleBrightness(20)}
-                        actionText="save"
-                    />
-                </div> */}
+
                 <div className="soliloquy">
                     <Helmet>
                         <style>{`

@@ -8,7 +8,7 @@
 
 .actions {
   width: 100%;
-  height: 70vh;
+  height: 65vh;
   border-top: 1px solid black;
   border-right: 1px solid black;
   border-left: 1px solid black;
@@ -55,6 +55,21 @@
   text-transform: lowercase;
 }
 
+.game {
+  width: 100%;
+  height: 5vh;
+  /* border-top: 1px solid black; */
+  border-right: 1px solid black;
+  /* border-left: 1px solid black; */
+  /* border-bottom: 1px solid black; */
+  text-align: right;
+  /* align-items: center; */
+  /* justify-content: right; */
+  /* vertical-align: middle; */
+  background-color: var(--primary);
+  text-transform: lowercase;
+}
+
 button {
   /* box-shadow:inset 0px 1px 0px 0px #ddccdd; */
   /* width: 100%; */
@@ -78,4 +93,21 @@ button:hover {
 button:active {
 	position:relative;
 	top:1px;
+}
+
+.signintop {
+  width: 100%;
+  height: 50vh;
+  vertical-align: middle;
+  text-align: center;
+  background-color: var(--primary);
+  text-transform: lowercase;
+}
+
+.signin {
+  width: 100%;
+  height: 50vh;
+  text-align: center;
+  background-color: var(--primary);
+  text-transform: lowercase;
 }
