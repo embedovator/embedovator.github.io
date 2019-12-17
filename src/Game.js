@@ -189,6 +189,7 @@ export default class Game extends Component {
         this.intervalHandle = setInterval(this.tick, 1000);
 
         // preserve the initial state in a new object
+        console.log("SAVED BASE STATE");
         this.baseState = this.state 
 
         // Uncomment me for vizualization! Then execute dot -Tps derp.dot -o graph.ps 
@@ -819,7 +820,7 @@ export default class Game extends Component {
                     <button
                         className="btn btn-sm"
                         id="signout-button"
-                        onClick={this.resetGame}
+                        onClick={() => this.resetGame()}
                     >
                         reset
                     </button>
