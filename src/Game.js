@@ -5,6 +5,27 @@ import {
     AwesomeButtonProgress,
 } from 'react-awesome-button';
 
+import AwesomeButtonStyles from 'react-awesome-button/src/styles/styles.scss'
+
+function Button(props) {
+    return (
+        <AwesomeButtonProgress
+            // cssModule={AwesomeButtonStyles}
+            type="secondary"
+            size="medium"
+            loadingLabel="patience..."
+            // disabled={this.props.disabled[transitions[i]] ? true : false}
+            type="primary"
+            onPress={next => {
+                // do a sync/async task then call `next()`
+                // this.props.onTransition(transitions[i], next)
+            }}
+        >
+            {props.actionText}
+      </AwesomeButtonProgress>
+    );
+}
+
 function Action(props) {
     return (
         <button type="button" className="action" hidden={props.hidden} disabled={props.disabled} onClick={props.onClick}>
@@ -53,22 +74,39 @@ class Actionz extends React.Component {
             // if((this.props.hidden[transitions[i]] == 'null') && (this.props.hidden[transitions[i]] != false)){
             // if(this.props.hidden[transitions[i]] !== true) {
                 // Inner loop to create children
-                children.push(<td>
-                    {/* <Action
-                        actionText={transitions[i]}
-                        onClick={() => this.props.onTransition(transitions[i])}
-                        hidden={this.props.hidden[transitions[i]] ? "true" : ""}
-                        disabled={this.props.disabled[transitions[i]] ? "true" : ""}
-                    /> */}
-                    <AwesomeButtonProgress
-                        type="secondary"
-                        size="medium"
-                        // action={(element, next) => doSomethingThenCall(next)}
-                        action={() => this.props.onTransition(transitions[i])}
-                    >
-                        {transitions[i]}
-                    </AwesomeButtonProgress>
-                    </td>)
+                let hidden = this.props.hidden[transitions[i]];
+                if(!hidden)
+                {
+                    children.push(<td>
+                        {/* <Action
+                            actionText={transitions[i]}
+                            onClick={() => this.props.onTransition(transitions[i])}
+                            hidden={this.props.hidden[transitions[i]] ? "true" : ""}
+                            disabled={this.props.disabled[transitions[i]] ? "true" : ""}
+                        /> */}
+                        <AwesomeButtonProgress
+                            type="secondary"
+                            size="medium"
+                            loadingLabel="patience..."
+                            disabled={this.props.disabled[transitions[i]] ? true : false}
+                            // cssModule={AwesomeButtonStyles}
+                            // onPress={next => {
+                            //     // do a sync/async task then call `next()`
+                            //     console.log("op1: " + next)
+                            //     this.props.onTransition(transitions[i])
+                            //     console.log("op2: " + next)
+                            //     next()
+                            // }}
+                            action={(element, next) => this.props.onTransition(transitions[i], next)}
+
+
+                            // releaseDelay={this.props.delay}
+                            // action={() => this.props.onTransition(transitions[i], next)}
+                        >
+                            {transitions[i]}
+                        </AwesomeButtonProgress>
+                        </td>)
+                }
                 //Create the parent and add the children
                 table.push(<tr>{children}</tr>)
             }
@@ -737,7 +775,8 @@ export default class Game extends Component {
         })
     }
 
-    handleTransition(name){
+    // handleTransition(name){
+    handleTransition(name, next){
         if (typeof this.state.fsm[`${name}`] === "function")
         {
             this.state.fsm[`${name}`]();
@@ -745,6 +784,7 @@ export default class Game extends Component {
         else {
             console.log("function '" + name + "' is invalid!");
         }
+        console.log("ht: " + next)
     }
 
     saveGame() {
