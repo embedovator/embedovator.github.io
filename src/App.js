@@ -10,7 +10,7 @@ import {
 const appConfig = new AppConfig()
 const userSession = new UserSession({ appConfig: appConfig })
 
-export default class App extends React.Component {
+export default class App extends Component {
   constructor(props){
     super(props);
   }

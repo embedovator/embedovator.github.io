@@ -5,46 +5,7 @@ import {
     AwesomeButtonProgress,
 } from 'react-awesome-button';
 
-import AwesomeButtonStyles from 'react-awesome-button/src/styles/styles.scss'
-
-function Action(props) {
-    return (
-        <button type="button" className="action" hidden={props.hidden} disabled={props.disabled} onClick={props.onClick}>
-            {props.actionText}
-        </button>
-    )
-}
-
-class Inventory extends React.Component {
-    createTable = () => {
-        if(this.props.show){
-            let table = []
-            let state = this.props.state;
-
-            if(false){
-                for (const [key, value] of Object.entries(state)) {
-                    let children = []
-                    children.push(<td>OHAI</td>)
-                    //    {key}: {value}
-                    table.push(<tr>{children}</tr>)
-                }
-            }
-            return table
-        }
-    }
-
-    render() {
-        return (
-            <div>
-                <table>
-                    {this.createTable()}
-                </table>
-            </div>
-        )
-    }
-}
-
-class Actionz extends React.Component {
+class Actionz extends Component {
     createTable = () => {
         let table = []
 
@@ -52,20 +13,8 @@ class Actionz extends React.Component {
         let transitions = this.props.transitions;
         for (let i = 0; i < transitions.length; i++){
             let children = []
-            // if((this.props.hidden[transitions[i]] == 'null') && (this.props.hidden[transitions[i]] != false)){
-            // if(this.props.hidden[transitions[i]] !== true) {
-                // Inner loop to create children
                 let hidden = this.props.hidden[transitions[i]];
                 let actionDelay = this.props.actionDelay[transitions[i]];
-                console.log(actionDelay);
-                // if(this.props.actionDelay[`${transitions[i]}`] in window){
-                // if(transitions[i] === 'brighten'){
-                    // actionDelay = this.props.actionDelay[transitions[i]];
-                    // console.log(actionDelay);
-                // }
-                // else{
-                    // console.log("INVALID");
-                // }
 
                 if(!hidden)
                 {
@@ -120,7 +69,7 @@ class Actionz extends React.Component {
     }
 }
 
-class Dialog extends React.Component {
+class Dialog extends Component {
     createTable = () => {
         let table = []
 
@@ -154,7 +103,6 @@ export default class Game extends Component {
         this.state = {
             tick: 0,
             workEndTick: 0,
-            brightnessTick: 0,
             brightness: 30, 
             dimRate: -0.3, 
             soliloquyRB: new RingBuffer(6),
@@ -613,7 +561,6 @@ export default class Game extends Component {
         this.setState({
            tick: this.state.tick + 1,
            workEndTick: workEndTick,
-           brightnessTick: this.state.brightnessTick + 1,
            dimRate: dimRate,
            brightness: brightness,
            users: users,
@@ -816,7 +763,6 @@ export default class Game extends Component {
     handleBrightness(brightnessChange) {
         let brightness = this.state.brightness;
         let soliloquyRB = this.state.soliloquyRB;
-        let brightnessTick = this.state.brightnessTick;
         let saveEnabled = this.state.saveEnabled;
 
         if((brightness + brightnessChange) <= 0){

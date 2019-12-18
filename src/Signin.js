@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Helmet } from "react-helmet";
-class Dialog extends React.Component {
+class Dialog extends Component {
     createTable = () => {
         let table = []
 
@@ -23,7 +23,7 @@ class Dialog extends React.Component {
     }
 }
 
-export default class Signin extends React.Component {
+export default class Signin extends Component {
   constructor(props){
     super(props);
 
