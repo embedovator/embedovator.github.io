@@ -1,5 +1,11 @@
 import React, { Component } from 'react';
 import { Helmet } from "react-helmet";
+import {
+    AwesomeButton,
+    AwesomeButtonProgress,
+} from 'react-awesome-button';
+
+import AwesomeButtonStyles from 'react-awesome-button/src/styles/styles.scss'
 
 function Action(props) {
     return (
@@ -49,13 +55,53 @@ class Actionz extends React.Component {
             // if((this.props.hidden[transitions[i]] == 'null') && (this.props.hidden[transitions[i]] != false)){
             // if(this.props.hidden[transitions[i]] !== true) {
                 // Inner loop to create children
-                children.push(<td>
-                    <Action
-                        actionText={transitions[i]}
-                        onClick={() => this.props.onTransition(transitions[i])}
-                        hidden={this.props.hidden[transitions[i]] ? "true" : ""}
-                        disabled={this.props.disabled[transitions[i]] ? "true" : ""}
-                    /></td>)
+                let hidden = this.props.hidden[transitions[i]];
+                let actionDelay = this.props.actionDelay[transitions[i]];
+                console.log(actionDelay);
+                // if(this.props.actionDelay[`${transitions[i]}`] in window){
+                // if(transitions[i] === 'brighten'){
+                    // actionDelay = this.props.actionDelay[transitions[i]];
+                    // console.log(actionDelay);
+                // }
+                // else{
+                    // console.log("INVALID");
+                // }
+
+                if(!hidden)
+                {
+                    if(actionDelay > 0){
+                        children.push(<td>
+                            <AwesomeButtonProgress
+                                type="secondary"
+                                size="large"
+                                loadingLabel="patience..."
+                                resultLabel=""
+                                releaseDelay={0}
+                                disabled={this.props.disabled[transitions[i]] ? true : false}
+                                onPress={(element, next) => {
+                                    this.props.onTransition(transitions[i])
+                                    setTimeout(() => {
+                                        next()
+                                    }, actionDelay)
+                                }}
+                            >
+                                {transitions[i]}
+                            </AwesomeButtonProgress>
+                        </td>)
+                        }
+                        else{
+                            children.push(<td>
+                                <AwesomeButton
+                                    size="large"
+                                    type="primary"
+                                    disabled={this.props.disabled[transitions[i]] ? true : false}
+                                    onPress={() => { this.props.onTransition(transitions[i]) }}
+                                >
+                                    {transitions[i]}
+                                </AwesomeButton>
+                                </td>)
+                            }
+                }
                 //Create the parent and add the children
                 table.push(<tr>{children}</tr>)
             }
@@ -113,6 +159,7 @@ export default class Game extends Component {
             dimRate: -0.3, 
             soliloquyRB: new RingBuffer(6),
             hidden: {'team':true, 'a simple search engine':true, 'a humble book store':true, 'a tiny social network':true, 'monetize users': true, 'contribute':true},
+            actionDelay: {'code':150, 'brighten':2000, 'code a simple search engine':3500, 'blockstack':9000, 'ethereum':10000, 'bitcoin':11000, 'fix legacy code':4000, 'write more lolcode':500, 'compile':2000, 'add another layer of abstraction':600, 'hire a frontend engineer':1000, 'hire a backend engineer':1100, 'hire an optimization engineer':1200, 'create a simple, modern frontend':4000, 'create a robust backend':5000, 'optimization!':6000, 'monetize users':15000},
             disabled: {},
             engineers: {'frontend':0, 'backend':0, 'optimization':0},
             contributors: 0,
@@ -133,7 +180,6 @@ export default class Game extends Component {
                 transitions: [
                     /* Transitions */
                     { name: 'a quiet room', from: 'home', to: 'quiet' },
-                    { name: 'inventory', from: 'home', to: 'inventory' },
                     { name: 'work', from: 'home', to: 'work'},
                     { name: 'contribute', from: 'home', to: 'contribute'},
                     { name: 'team', from: 'home', to: 'team' },
@@ -145,7 +191,7 @@ export default class Game extends Component {
                     { name: "a tiny social network", from: 'work', to: 'social'},
                     { name: "code for some BS temp job", from: 'work', to: 'bs' },
                     /* Going back */
-                    { name: 'back', from: ['quiet','inventory','work','search','book', 'social', 'team', 'bs', 'contribute'], to: 'home' },
+                    { name: 'back', from: ['quiet','work','search','book', 'social', 'team', 'bs', 'contribute'], to: 'home' },
                     /* Actions, implemented as state transitions to self */
                     { name: 'brighten', from: 'home', to: 'home' },
                     { name: 'code', from: 'quiet', to: 'quiet' },
@@ -167,7 +213,6 @@ export default class Game extends Component {
                 methods: {
                     onBrighten: () => this.handleBrightness(20),
                     onCode: () => this.handleCode(),
-                    onEnterInventory: () => this.handleInventory(),
                     "onHire a frontend engineer": () => this.handleHire("frontend"),
                     "onHire a backend engineer": () => this.handleHire("backend"),
                     "onHire an optimization engineer": () => this.handleHire("optimization"),
@@ -279,7 +324,7 @@ export default class Game extends Component {
         let worked = this.state.worked;
 
         const reqLOC = 10;
-        const reward = 5;
+        const reward = 10;
 
         if(loc >= reqLOC){
             worked = true;
@@ -305,13 +350,17 @@ export default class Game extends Component {
         let money = this.state.money;
         let monetization = (this.state.users * 5);
         let adoptionRate = this.state.adoptionRate;
-        console.log("Got money for having users: " + monetization);
+        let soliloquyRB = this.state.soliloquyRB;
+        let users = this.state.users;
+
+        soliloquyRB.enq("Made $" + monetization + " off of " + users  + " users!");
 
         money += monetization;
 
         this.setState({
             money:money,
             adoptionRate: adoptionRate - 10,
+            soliloquyRB: soliloquyRB,
         });
     }
 
@@ -473,12 +522,16 @@ export default class Game extends Component {
             }
         }
 
-        if(engineers in window){
+        if(engineers !== null){
             for (const [position, count] of Object.entries(engineers)) {
-                const ongoingCost = -0.3;
+                // const ongoingCost = -0.3;
+                const ongoingCost = -5;
                 if(count !== 0){
                     if(money > ongoingCost){
                         money += (ongoingCost * count);
+                        if(adoptionRate < 0){
+                            money += adoptionRate;
+                        }
                     }
                     else{
                         if(!tippingPoint){
@@ -502,7 +555,7 @@ export default class Game extends Component {
             money -= ongoingCost;
         }
 
-        let userRequirement = (this.state.engineers['frontend'] > 3);
+        let userRequirement = ((this.state.engineers['frontend'] > 0) && (this.state.engineers['backend'] > 0) && (this.state.engineers['optimization'] > 0));
         if(userRequirement) {
             users += adoptionRate;
             adoptionRate += 1;
@@ -512,7 +565,7 @@ export default class Game extends Component {
             delete hidden['monetize users'];
         }
 
-        if(users > 1000){
+        if(users > 10000){
             if(!tippingPoint)
             {
                 soliloquyRB.enq("Reached the tipping point for number of users! We can't fail now.");
@@ -521,7 +574,6 @@ export default class Game extends Component {
         }
 
         if(tippingPoint){
-            adoptionRate -= 0.5;
             if(users <= 0){
                 users = 0;
             }
@@ -548,6 +600,7 @@ export default class Game extends Component {
             }
             else if (tick === (workEndTick + 16)) {
                 soliloquyRB.enq("Can’t even afford my electricity bill...");
+                soliloquyRB.enq("LPT: Reset the game and try again...this time without ever working!");
                 dimRate += -3;
             }
         }
@@ -572,21 +625,6 @@ export default class Game extends Component {
         });
     }
 
-    handleInventory(){
-        let soliloquyRB = this.state.soliloquyRB;
-        let users = this.state.users;
-
-        if((users > 0) || this.state.tippingPoint) soliloquyRB.enq("users: " + this.state.users);
-        soliloquyRB.enq("lines of code: " + this.state.codeXP);
-        soliloquyRB.enq("$: " + this.state.money);
-        //TODO: Only show as earned...
-        // soliloquyRB.enq("backend engineers: " + this.state.codeXP);
-
-        this.setState({
-            soliloquyRB: soliloquyRB,
-        })
-    }
-
     handleBookstore(){
     }
 
@@ -601,7 +639,7 @@ export default class Game extends Component {
         let worked = this.state.worked;
 
         const reqLOC = 30;
-        const reward = 5;
+        const reward = 25;
 
         if(this.state.codeXP >= reqLOC){
             worked = true;
@@ -784,28 +822,37 @@ export default class Game extends Component {
         if((brightness + brightnessChange) <= 0){
             brightness = 0;
         }
-        else {
-            if(brightnessTick >= 3)
-            {
-                if(saveEnabled){
-                    this.saveGame();
-                    soliloquyRB.enq("game saved.")
-                }
-
-                brightness += brightnessChange;
-                brightnessTick = 0;
-            }
+        else if((brightness + brightnessChange) > 100){
+            brightness = 100;
         }
+        else {
+            brightness += brightnessChange;
+        }
+        soliloquyRB.enq("game saved.")
 
         this.setState({
             brightness: brightness,
-            brightnessTick: brightnessTick,
             soliloquyRB: soliloquyRB,
         });
+
+        if(saveEnabled){
+            this.saveGame();
+        }
+    }
+
+    displayEngineers(){
+        //TODO: Return table of engineers and other data
     }
 
     render() {
         const soliloquyRB= this.state.soliloquyRB;
+        let users = this.state.users;
+        let frontend = this.state.engineers['frontend'];
+        let backend = this.state.engineers['backend'];
+        let optimization = this.state.engineers['optimization'];
+        let contributors = this.state.contributors;
+        let tippingPoint = this.state.tippingPoint;
+        let loan = this.state.loan;
 
         return (
             <div className="game-area">
@@ -831,13 +878,28 @@ export default class Game extends Component {
                         hidden={this.state.hidden}
                         disabled={this.state.disabled}
                         onTransition={(name) => this.handleTransition(name)}
+                        fsmState={this.state.fsm.state}
+                        actionDelay={this.state.actionDelay}
                     />
-                    <Inventory
-                        show={(this.state.fsm.state === 'inventory')}
-                        data={this.state}
-                    />
+                    <div className="inventory">
+                        <h2>Inventory:</h2>
+                        $: {this.state.money}
+                        <br></br>
+                        lines of code: {this.state.codeXP}
+                        <br></br>
+                        {(contributors > 0) ? "contributors: " + contributors : ""}
+                        <br></br>
+                        {frontend > 0 ? "frontend engineer: " + frontend : ""}
+                        <br></br>
+                        {backend > 0 ? "backend engineer: " + backend : ""}
+                        <br></br>
+                        {optimization > 0 ? "optimization engineer: " + optimization : ""}
+                        <br></br>
+                        {(users > 0) || tippingPoint  ? "users: " + users : ""}
+                        <br></br>
+                        {(loan > 0) ? "loan: $" + loan : ""}
+                   </div>
                 </div>
-
                 <div className="soliloquy">
                     <Helmet>
                         <style>{`
@@ -851,7 +913,8 @@ export default class Game extends Component {
                          soliloquyRB={soliloquyRB}
                      />
                 </div>
-            </div>
+           </div>
+            
         );
     }
 }
