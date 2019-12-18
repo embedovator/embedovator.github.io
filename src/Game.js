@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import { Helmet } from "react-helmet";
+import {
+    AwesomeButton,
+    AwesomeButtonProgress,
+} from 'react-awesome-button';
 
 function Action(props) {
     return (
@@ -50,12 +54,21 @@ class Actionz extends React.Component {
             // if(this.props.hidden[transitions[i]] !== true) {
                 // Inner loop to create children
                 children.push(<td>
-                    <Action
+                    {/* <Action
                         actionText={transitions[i]}
                         onClick={() => this.props.onTransition(transitions[i])}
                         hidden={this.props.hidden[transitions[i]] ? "true" : ""}
                         disabled={this.props.disabled[transitions[i]] ? "true" : ""}
-                    /></td>)
+                    /> */}
+                    <AwesomeButtonProgress
+                        type="secondary"
+                        size="medium"
+                        // action={(element, next) => doSomethingThenCall(next)}
+                        action={() => this.props.onTransition(transitions[i])}
+                    >
+                        {transitions[i]}
+                    </AwesomeButtonProgress>
+                    </td>)
                 //Create the parent and add the children
                 table.push(<tr>{children}</tr>)
             }
@@ -851,7 +864,8 @@ export default class Game extends Component {
                          soliloquyRB={soliloquyRB}
                      />
                 </div>
-            </div>
+           </div>
+            
         );
     }
 }
