@@ -7,32 +7,6 @@ import {
 
 import AwesomeButtonStyles from 'react-awesome-button/src/styles/styles.scss'
 
-function Button(props) {
-    return (
-        <AwesomeButtonProgress
-            // cssModule={AwesomeButtonStyles}
-            type="secondary"
-            size="medium"
-            loadingLabel="patience..."
-            // disabled={this.props.disabled[transitions[i]] ? true : false}
-            disabled={props.disabled}
-            // onPress={next => {
-                // do a sync/async task then call `next()`
-                // this.props.onTransition(transitions[i], next)
-                // props.action(next)
-            // }}
-            // onPress={(element, next) => {
-            //     console.log("What's up bro...")
-            //     setTimeout(() => {
-            //         next()
-            //     }, 600)
-            // }}
-            >
-            {props.actionText}
-      </AwesomeButtonProgress>
-    );
-}
-
 function Action(props) {
     return (
         <button type="button" className="action" hidden={props.hidden} disabled={props.disabled} onClick={props.onClick}>
@@ -82,53 +56,46 @@ class Actionz extends React.Component {
             // if(this.props.hidden[transitions[i]] !== true) {
                 // Inner loop to create children
                 let hidden = this.props.hidden[transitions[i]];
+                let isAction = this.props.isAction;
+                console.log("1"+isAction["brighten"]);
+                console.log("2"+isAction[transitions[i]]);
+                console.log("3"+isAction[`${transitions[i]}`]);
+                console.log("4"+JSON.stringify(isAction));
+                console.log("t:"+transitions[i]);
+
                 if(!hidden)
                 {
-                    children.push(<td>
-                        {/* <Action
-                            actionText={transitions[i]}
-                            onClick={() => this.props.onTransition(transitions[i])}
-                            hidden={this.props.hidden[transitions[i]] ? "true" : ""}
-                            disabled={this.props.disabled[transitions[i]] ? "true" : ""}
-                        /> */}
-                        {/* <Button
-                            actionText={transitions[i]}
-                            disabled={this.props.disabled[transitions[i]] ? true : false}
-                            // action={(next) => this.props.onTransition(transitions[i], next)}
-                            action={(next) => next()}
-                        /> */}
-                        <AwesomeButtonProgress
-                            type="secondary"
-                            size="medium"
-                            loadingLabel="patience..."
-                            resultLabel=""
-                            disabled={this.props.disabled[transitions[i]] ? true : false}
-                            // cssModule={AwesomeButtonStyles}
-                            // onPress={next => {
-                            //     // do a sync/async task then call `next()`
-                            //     console.log("op1: " + next)
-                            //     this.props.onTransition(transitions[i])
-                            //     console.log("op2: " + next)
-                            //     next()
-                            // }}
-
-                            onPress={(element, next) => {
-                                console.log("What's up bro...")
-                                this.props.onTransition(transitions[i])
-                                setTimeout(() => {
-                                    next()
-                                }, 100)
-                            }}
-
-                            // action={(element, next) => this.props.onTransition(transitions[i], next)}
-
-
-                            // releaseDelay={this.props.delay}
-                            // action={() => this.props.onTransition(transitions[i], next)}
-                        >
-                            {transitions[i]}
-                        </AwesomeButtonProgress>
+                    if(isAction[transitions[i]]){
+                        children.push(<td>
+                            <AwesomeButtonProgress
+                                type="secondary"
+                                // size="large"
+                                loadingLabel="patience..."
+                                resultLabel=""
+                                releaseDelay={0}
+                                disabled={this.props.disabled[transitions[i]] ? true : false}
+                                onPress={(element, next) => {
+                                    this.props.onTransition(transitions[i])
+                                    setTimeout(() => {
+                                        next()
+                                    }, this.props.delay)
+                                }}
+                            >
+                                {transitions[i]}
+                            </AwesomeButtonProgress>
                         </td>)
+                        }
+                        else{
+                            children.push(<td>
+                                <AwesomeButton
+                                    type="primary"
+                                    disabled={this.props.disabled[transitions[i]] ? true : false}
+                                    onPress={() => { this.props.onTransition(transitions[i]) }}
+                                >
+                                    {transitions[i]}
+                                </AwesomeButton>
+                                </td>)
+                            }
                 }
                 //Create the parent and add the children
                 table.push(<tr>{children}</tr>)
@@ -187,6 +154,7 @@ export default class Game extends Component {
             dimRate: -0.3, 
             soliloquyRB: new RingBuffer(6),
             hidden: {'team':true, 'a simple search engine':true, 'a humble book store':true, 'a tiny social network':true, 'monetize users': true, 'contribute':true},
+            isAction: {'code':true, 'brighten':true, 'code a simple search engine':true, 'blockstack':true, 'ethereum':true, 'bitcoin':true, 'fix legacy code':true, 'write more lolcode':true, 'compile':true, 'add another layer of abstraction':true, 'hire a frontend engineer':true, 'hire a backend engineer':true, 'hire an optimization engineer':true, 'create a simple, modern frontend':true, 'create a robust backend':true, 'optimization!':true, 'monetize users':true},
             disabled: {},
             engineers: {'frontend':0, 'backend':0, 'optimization':0},
             contributors: 0,
@@ -239,6 +207,8 @@ export default class Game extends Component {
                     { name: 'monetize users', from: 'search', to: 'search'},
                 ],
                 methods: {
+                    // onAfterTransition: (lifecycle) => this.setAction(lifecycle),
+                    onEnterState: (lifecycle) => this.setAction(lifecycle),
                     onBrighten: () => this.handleBrightness(20),
                     onCode: () => this.handleCode(),
                     onEnterInventory: () => this.handleInventory(),
@@ -269,6 +239,31 @@ export default class Game extends Component {
         // Uncomment me for vizualization! Then execute dot -Tps derp.dot -o graph.ps 
         // var visualize = require('javascript-state-machine/lib/visualize');
         // console.log(visualize(this.state.fsm));
+    }
+
+    // isAction(transition){
+    //     let isAction = this.state.isAction;
+    //     return (isAction[`${transition}`] === true);
+    // }
+
+    setAction(lifecycle){
+        // let isAction = this.state.tick;//isAction;
+
+        // console.log(lifecycle.transition); // 'step'
+        // console.log(lifecycle.from);       // 'A'
+        // console.log(lifecycle.to);         // 'B'
+        // if(lifecycle.from === lifecycle.to){
+        //     console.log(lifecycle.transition + " is an ACTION");
+        //     isAction[`${lifecycle.transition}`] = true;
+        //     return true;
+        // }
+        // else{
+        //     console.log(lifecycle.transition + " is a TRANSITION");
+        // }
+
+        // this.setState({
+        //     isAction: isAction,
+        // });
     }
 
     handleContribute(project){
@@ -799,7 +794,6 @@ export default class Game extends Component {
     }
 
     handleTransition(name){
-    // handleTransition(name, next){
         if (typeof this.state.fsm[`${name}`] === "function")
         {
             this.state.fsm[`${name}`]();
@@ -807,7 +801,6 @@ export default class Game extends Component {
         else {
             console.log("function '" + name + "' is invalid!");
         }
-        // console.log("ht: " + next)
     }
 
     saveGame() {
@@ -860,24 +853,22 @@ export default class Game extends Component {
         if((brightness + brightnessChange) <= 0){
             brightness = 0;
         }
-        else {
-            if(brightnessTick >= 3)
-            {
-                if(saveEnabled){
-                    this.saveGame();
-                    soliloquyRB.enq("game saved.")
-                }
-
-                brightness += brightnessChange;
-                brightnessTick = 0;
-            }
+        else if((brightness + brightnessChange) > 100){
+            brightness = 100;
         }
+        else {
+            brightness += brightnessChange;
+        }
+        soliloquyRB.enq("game saved.")
 
         this.setState({
             brightness: brightness,
-            brightnessTick: brightnessTick,
             soliloquyRB: soliloquyRB,
         });
+
+        if(saveEnabled){
+            this.saveGame();
+        }
     }
 
     render() {
@@ -906,11 +897,11 @@ export default class Game extends Component {
                         transitions={this.state.fsm.transitions()}
                         hidden={this.state.hidden}
                         disabled={this.state.disabled}
-                        onTransition={(name, next) => this.handleTransition(name, next)}
+                        onTransition={(name) => this.handleTransition(name)}
+                        fsmState={this.state.fsm.state}
+                        delay={500}
+                        isAction={this.state.isAction}
                     />
-                    {/* <Button 
-                        actionText="DERP"
-                    /> */}
                     <Inventory
                         show={(this.state.fsm.state === 'inventory')}
                         data={this.state}
