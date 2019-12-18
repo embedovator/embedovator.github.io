@@ -56,20 +56,25 @@ class Actionz extends React.Component {
             // if(this.props.hidden[transitions[i]] !== true) {
                 // Inner loop to create children
                 let hidden = this.props.hidden[transitions[i]];
-                let isAction = this.props.isAction;
-                console.log("1"+isAction["brighten"]);
-                console.log("2"+isAction[transitions[i]]);
-                console.log("3"+isAction[`${transitions[i]}`]);
-                console.log("4"+JSON.stringify(isAction));
-                console.log("t:"+transitions[i]);
+                let actionDelay = this.props.actionDelay[transitions[i]];
+                console.log(actionDelay);
+                // if(this.props.actionDelay[`${transitions[i]}`] in window){
+                // if(transitions[i] === 'brighten'){
+                    // actionDelay = this.props.actionDelay[transitions[i]];
+                    // console.log(actionDelay);
+                // }
+                // else{
+                    // console.log("INVALID");
+                // }
 
                 if(!hidden)
                 {
-                    if(isAction[transitions[i]]){
+                    if(actionDelay > 0){
                         children.push(<td>
                             <AwesomeButtonProgress
                                 type="secondary"
                                 // size="large"
+                                size={transitions[i] === "code" ? "medium" : ""}
                                 loadingLabel="patience..."
                                 resultLabel=""
                                 releaseDelay={0}
@@ -78,7 +83,7 @@ class Actionz extends React.Component {
                                     this.props.onTransition(transitions[i])
                                     setTimeout(() => {
                                         next()
-                                    }, this.props.delay)
+                                    }, actionDelay)
                                 }}
                             >
                                 {transitions[i]}
@@ -154,7 +159,7 @@ export default class Game extends Component {
             dimRate: -0.3, 
             soliloquyRB: new RingBuffer(6),
             hidden: {'team':true, 'a simple search engine':true, 'a humble book store':true, 'a tiny social network':true, 'monetize users': true, 'contribute':true},
-            isAction: {'code':true, 'brighten':true, 'code a simple search engine':true, 'blockstack':true, 'ethereum':true, 'bitcoin':true, 'fix legacy code':true, 'write more lolcode':true, 'compile':true, 'add another layer of abstraction':true, 'hire a frontend engineer':true, 'hire a backend engineer':true, 'hire an optimization engineer':true, 'create a simple, modern frontend':true, 'create a robust backend':true, 'optimization!':true, 'monetize users':true},
+            actionDelay: {'code':150, 'brighten':2000, 'code a simple search engine':3500, 'blockstack':9000, 'ethereum':10000, 'bitcoin':11000, 'fix legacy code':4000, 'write more lolcode':500, 'compile':2000, 'add another layer of abstraction':600, 'hire a frontend engineer':1000, 'hire a backend engineer':1100, 'hire an optimization engineer':1200, 'create a simple, modern frontend':4000, 'create a robust backend':5000, 'optimization!':6000, 'monetize users':30000},
             disabled: {},
             engineers: {'frontend':0, 'backend':0, 'optimization':0},
             contributors: 0,
@@ -542,12 +547,16 @@ export default class Game extends Component {
             }
         }
 
-        if(engineers in window){
+        if(engineers !== null){
             for (const [position, count] of Object.entries(engineers)) {
-                const ongoingCost = -0.3;
+                // const ongoingCost = -0.3;
+                const ongoingCost = -5;
                 if(count !== 0){
                     if(money > ongoingCost){
                         money += (ongoingCost * count);
+                        if(adoptionRate < 0){
+                            money += adoptionRate;
+                        }
                     }
                     else{
                         if(!tippingPoint){
@@ -571,7 +580,7 @@ export default class Game extends Component {
             money -= ongoingCost;
         }
 
-        let userRequirement = (this.state.engineers['frontend'] > 3);
+        let userRequirement = ((this.state.engineers['frontend'] > 0) && (this.state.engineers['backend'] > 0) && (this.state.engineers['optimization'] > 0));
         if(userRequirement) {
             users += adoptionRate;
             adoptionRate += 1;
@@ -590,7 +599,7 @@ export default class Game extends Component {
         }
 
         if(tippingPoint){
-            adoptionRate -= 0.5;
+            adoptionRate -= 10;
             if(users <= 0){
                 users = 0;
             }
@@ -617,6 +626,7 @@ export default class Game extends Component {
             }
             else if (tick === (workEndTick + 16)) {
                 soliloquyRB.enq("Can’t even afford my electricity bill...");
+                soliloquyRB.enq("LPT: Reset the game and try again...this time without ever working!");
                 dimRate += -3;
             }
         }
@@ -644,12 +654,26 @@ export default class Game extends Component {
     handleInventory(){
         let soliloquyRB = this.state.soliloquyRB;
         let users = this.state.users;
+        let frontend = this.state.engineers['frontend'];
+        let backend = this.state.engineers['backend'];
+        let optimization = this.state.engineers['optimization'];
+        let contributor = this.state.contributors;
 
         if((users > 0) || this.state.tippingPoint) soliloquyRB.enq("users: " + this.state.users);
         soliloquyRB.enq("lines of code: " + this.state.codeXP);
         soliloquyRB.enq("$: " + this.state.money);
-        //TODO: Only show as earned...
-        // soliloquyRB.enq("backend engineers: " + this.state.codeXP);
+        if(frontend > 0){
+            soliloquyRB.enq("frontend: " + frontend)
+        }
+        if(backend > 0){
+            soliloquyRB.enq("backend: " + backend)
+        }
+        if(optimization > 0){
+            soliloquyRB.enq("optimization: " + optimization)
+        }
+        if(contributor > 0){
+            soliloquyRB.enq("contributors: " + contributor)
+        }
 
         this.setState({
             soliloquyRB: soliloquyRB,
@@ -899,8 +923,7 @@ export default class Game extends Component {
                         disabled={this.state.disabled}
                         onTransition={(name) => this.handleTransition(name)}
                         fsmState={this.state.fsm.state}
-                        delay={500}
-                        isAction={this.state.isAction}
+                        actionDelay={this.state.actionDelay}
                     />
                     <Inventory
                         show={(this.state.fsm.state === 'inventory')}
