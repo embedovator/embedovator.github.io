@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import Signin from './Signin.js';
-import Game from './Game.js';
+import Signin from './Signin';
+import Game from './Game';
 import {
   UserSession,
   AppConfig
