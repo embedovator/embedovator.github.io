@@ -23,7 +23,7 @@ class Dialog extends React.Component {
     }
 }
 
-export default class Signin extends Component {
+export default class Signin extends React.Component {
   constructor(props){
     super(props);
 

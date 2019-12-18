@@ -5,7 +5,7 @@ import {
 
 const avatarFallbackImage = 'https://s3.amazonaws.com/onename/avatar-placeholder.png';
 
-export default class Profile extends Component {
+export default class Profile extends React.Component {
   constructor(props) {
   	super(props);
 
