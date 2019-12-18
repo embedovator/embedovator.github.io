@@ -15,12 +15,19 @@ function Button(props) {
             size="medium"
             loadingLabel="patience..."
             // disabled={this.props.disabled[transitions[i]] ? true : false}
-            type="primary"
-            onPress={next => {
+            disabled={props.disabled}
+            // onPress={next => {
                 // do a sync/async task then call `next()`
                 // this.props.onTransition(transitions[i], next)
-            }}
-        >
+                // props.action(next)
+            // }}
+            // onPress={(element, next) => {
+            //     console.log("What's up bro...")
+            //     setTimeout(() => {
+            //         next()
+            //     }, 600)
+            // }}
+            >
             {props.actionText}
       </AwesomeButtonProgress>
     );
@@ -84,10 +91,17 @@ class Actionz extends React.Component {
                             hidden={this.props.hidden[transitions[i]] ? "true" : ""}
                             disabled={this.props.disabled[transitions[i]] ? "true" : ""}
                         /> */}
+                        {/* <Button
+                            actionText={transitions[i]}
+                            disabled={this.props.disabled[transitions[i]] ? true : false}
+                            // action={(next) => this.props.onTransition(transitions[i], next)}
+                            action={(next) => next()}
+                        /> */}
                         <AwesomeButtonProgress
                             type="secondary"
                             size="medium"
                             loadingLabel="patience..."
+                            resultLabel=""
                             disabled={this.props.disabled[transitions[i]] ? true : false}
                             // cssModule={AwesomeButtonStyles}
                             // onPress={next => {
@@ -97,7 +111,16 @@ class Actionz extends React.Component {
                             //     console.log("op2: " + next)
                             //     next()
                             // }}
-                            action={(element, next) => this.props.onTransition(transitions[i], next)}
+
+                            onPress={(element, next) => {
+                                console.log("What's up bro...")
+                                this.props.onTransition(transitions[i])
+                                setTimeout(() => {
+                                    next()
+                                }, 100)
+                            }}
+
+                            // action={(element, next) => this.props.onTransition(transitions[i], next)}
 
 
                             // releaseDelay={this.props.delay}
@@ -775,8 +798,8 @@ export default class Game extends Component {
         })
     }
 
-    // handleTransition(name){
-    handleTransition(name, next){
+    handleTransition(name){
+    // handleTransition(name, next){
         if (typeof this.state.fsm[`${name}`] === "function")
         {
             this.state.fsm[`${name}`]();
@@ -784,7 +807,7 @@ export default class Game extends Component {
         else {
             console.log("function '" + name + "' is invalid!");
         }
-        console.log("ht: " + next)
+        // console.log("ht: " + next)
     }
 
     saveGame() {
@@ -883,8 +906,11 @@ export default class Game extends Component {
                         transitions={this.state.fsm.transitions()}
                         hidden={this.state.hidden}
                         disabled={this.state.disabled}
-                        onTransition={(name) => this.handleTransition(name)}
+                        onTransition={(name, next) => this.handleTransition(name, next)}
                     />
+                    {/* <Button 
+                        actionText="DERP"
+                    /> */}
                     <Inventory
                         show={(this.state.fsm.state === 'inventory')}
                         data={this.state}
