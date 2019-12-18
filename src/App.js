@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Profile from './Profile.js';
 import Signin from './Signin.js';
 import Game from './Game.js';
 import {
@@ -11,10 +10,6 @@ const appConfig = new AppConfig()
 const userSession = new UserSession({ appConfig: appConfig })
 
 export default class App extends Component {
-  constructor(props){
-    super(props);
-  }
-
   handleSignIn(e) {
     e.preventDefault();
     userSession.redirectToSignIn();
