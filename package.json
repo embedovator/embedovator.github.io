@@ -1,7 +1,7 @@
 {
   "name": "a-dark-screen",
   "version": "0.0.1",
-  "homepage": "https://embedovator.github.io/a-dark-screen",
+  "homepage": "https://embedovator.github.io",
   "description": "A simple Blockstack game using ReactJS",
   "repository": {
     "type": "git",
