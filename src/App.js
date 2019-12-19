@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import Profile from './Profile.js';
-import Signin from './Signin.js';
+import Signin from './Signin';
+import Game from './Game';
 import {
   UserSession,
   AppConfig
@@ -28,7 +28,7 @@ export default class App extends Component {
         <div className="site-wrapper-inner">
           { !userSession.isUserSignedIn() ?
             <Signin userSession={userSession} handleSignIn={ this.handleSignIn } />
-            : <Profile userSession={userSession} handleSignOut={ this.handleSignOut } />
+            : <Game userSession={userSession} handleSignOut={this.handleSignOut} />
           }
         </div>
       </div>
