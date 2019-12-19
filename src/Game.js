@@ -5,6 +5,8 @@ import {
     AwesomeButtonProgress,
 } from 'react-awesome-button';
 
+import AwesomeButtonStyles from 'react-awesome-button/src/styles/styles.scss';
+
 class Actionz extends Component {
     createTable = () => {
         let table = []
