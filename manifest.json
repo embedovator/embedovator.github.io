@@ -1,6 +1,6 @@
 {
-  "name": "A Dark Screen",
-  "description": "eyes are tired. screen is dim. can't see.",
+  "name": "Hello, Blockstack",
+  "description": "A simple demo of Blockstack Auth",
   "icons": [
     {
     "src": "favicon.ico",
